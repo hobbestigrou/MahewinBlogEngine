@@ -1,4 +1,4 @@
-package Text::Simple::Blog::Renderer::HTML;
+package MahewinBlogEngine::Renderer::HTML;
 
 use strict;
 use warnings;

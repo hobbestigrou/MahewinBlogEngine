@@ -1,4 +1,4 @@
-package Text::Simple::Blog::Utils;
+package MahewinBlogEngine::Utils;
 
 use strict;
 use warnings;
@@ -21,12 +21,12 @@ sub converted_text {
     my $class;
 
     if ( $r ) {
-        $class = "Text::Simple::Blog::Renderer::$r";
+        $class = "MahewinBlogEngine::Renderer::$r";
         load $class;
     }
     else {
         load Renderer;
-        $class = 'Text::Simple::Blog::Renderer';
+        $class = 'MahewinBlogEngine::Renderer';
     }
 
     my $renderer = $class->new();

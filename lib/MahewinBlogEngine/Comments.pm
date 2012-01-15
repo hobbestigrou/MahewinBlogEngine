@@ -1,4 +1,4 @@
-package Text::Simple::Blog::Comments;
+package MahewinBlogEngine::Comments;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 use Moose;
 use File::Slurp;
 use Time::Local qw(timelocal);
-use Text::Simple::Blog::Utils qw(converted_text);
+use MahewinBlogEngine::Utils qw(converted_text);
 
 has '_comments' => (
     is      => 'ro',

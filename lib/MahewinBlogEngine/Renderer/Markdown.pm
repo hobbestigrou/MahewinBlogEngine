@@ -1,4 +1,4 @@
-package Text::Simple::Blog::Renderer::Markdown;
+package MahewinBlogEngine::Renderer::Markdown;
 
 use Moose;
 

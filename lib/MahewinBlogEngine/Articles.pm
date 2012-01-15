@@ -1,4 +1,4 @@
-package Text::Simple::Blog::Articles;
+package MahewinBlogEngine::Articles;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use Moose;
 use File::Slurp;
 
 use POSIX;
-use Text::Simple::Blog::Utils qw(converted_text);
+use MahewinBlogEngine::Utils qw(converted_text);
 use Time::Local qw(timelocal);
 
 has '_articles' => (

@@ -1,26 +1,26 @@
-package Text::Simple::Blog;
+package MahewinBlogEngine;
 
 use strict;
 use warnings;
 
 use Moose;
 
-use Text::Simple::Blog::Articles;
-use Text::Simple::Blog::Comments;
+use MahewinBlogEngine::Articles;
+use MahewinBlogEngine::Comments;
 
 #ABSTRACT: A simple blog engine
 
 sub articles {
     my ( $self, $args ) = @_;
 
-    my $articles = Text::Simple::Blog::Articles->new($args);
+    my $articles = MahewinBlogEngine::Articles->new($args);
     return $articles;
 }
 
 sub comments {
     my ( $self, $args ) = @_;
 
-    my $comments = Text::Simple::Blog::Comments->new($args);
+    my $comments = MahewinBlogEngine::Comments->new($args);
     return $comments;
 }
 
