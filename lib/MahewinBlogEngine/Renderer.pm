@@ -1,11 +1,12 @@
 package MahewinBlogEngine::Renderer;
 
 use Moose;
+use Carp;
 
 sub renderer {
     my ( $self, $text ) = @_;
 
-    die 'Not implemented';
+    croak 'Not implemented';
 }
 
 1;

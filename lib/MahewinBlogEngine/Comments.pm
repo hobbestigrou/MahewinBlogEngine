@@ -4,6 +4,9 @@ use strict;
 use warnings;
 
 use Moose;
+
+use Carp;
+
 use File::Slurp;
 use Time::Local qw(timelocal);
 use MahewinBlogEngine::Utils qw(converted_text);
@@ -51,7 +54,7 @@ sub _build_comments {
             $url    =~ s/Url:\s//;
             $hidden =~ s/Hidden:\s//;
 
-            die 'Filename not parseable: ' . $file unless $file =~ /^
+            croak 'Filename not parseable: ' . $file unless $file =~ /^
                 (\d\d\d\d)          # year
                 -(\d\d)             # month
                 -(\d\d)             # day

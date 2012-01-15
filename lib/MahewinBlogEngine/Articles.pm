@@ -5,9 +5,11 @@ use warnings;
 
 use Moose;
 
-use File::Slurp;
 
 use POSIX;
+use Carp;
+
+use File::Slurp;
 use MahewinBlogEngine::Utils qw(converted_text);
 use Time::Local qw(timelocal);
 
@@ -47,7 +49,7 @@ sub _build_articles {
         $title =~ s/Title:\s//;
         $tags  =~ s/Tags:\s//;
 
-        die 'Filename not parseable: ' . $file unless $file =~ /^
+        croak 'Filename not parseable: ' . $file unless $file =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
             -(\d\d)             # day
