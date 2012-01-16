@@ -42,18 +42,6 @@ sub _build_comments {
 
         while(defined (my $file = readdir(COMMENTS))) {
             next if $file eq '.' || $file eq '..';
-            my @lines = read_file("$direct/$dir/$file");
-
-            my $author = shift(@lines);
-            my $mail   = shift(@lines);
-            my $url    = shift(@lines);
-            my $hidden = shift(@lines);
-
-            $author =~ s/Name:\s//;
-            $mail   =~ s/Mail:\s//;
-            $url    =~ s/Url:\s//;
-            $hidden =~ s/Hidden:\s//;
-
             croak 'Filename not parseable: ' . $file unless $file =~ /^
                 (\d\d\d\d)          # year
                 -(\d\d)             # month
@@ -63,6 +51,17 @@ sub _build_comments {
                 -(\d\d)             # second
                 \.([a-z]+)          # extension
             $/ix;
+
+            my @lines  = read_file("$direct/$dir/$file");
+            my $author = shift(@lines);
+            my $mail   = shift(@lines);
+            my $url    = shift(@lines);
+            my $hidden = shift(@lines);
+
+            $author =~ s/Name:\s//;
+            $mail   =~ s/Mail:\s//;
+            $url    =~ s/Url:\s//;
+            $hidden =~ s/Hidden:\s//;
 
             my $time      = timelocal($6, $5, $4, $3, $2 - 1, $1);
             my $extension = lc($7);

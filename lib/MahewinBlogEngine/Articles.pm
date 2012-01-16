@@ -41,14 +41,6 @@ sub _build_articles {
     my @articles;
 
     foreach my $file (@files_tri) {
-        my @lines = read_file("$directory/$file", binmode => ':utf8');
-
-        my $title = shift(@lines);
-        my $tags  = shift(@lines);
-
-        $title =~ s/Title:\s//;
-        $tags  =~ s/Tags:\s//;
-
         croak 'Filename not parseable: ' . $file unless $file =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
@@ -57,6 +49,13 @@ sub _build_articles {
             _(.*)               # url part
             \.([a-z]+)          # extension
         $/ix;
+
+        my @lines = read_file("$directory/$file", binmode => ':utf8');
+        my $title = shift(@lines);
+        my $tags  = shift(@lines);
+
+        $title =~ s/Title:\s//;
+        $tags  =~ s/Tags:\s//;
 
         #Build date, url part and extension
         my $time      = timelocal(0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
