@@ -52,6 +52,9 @@ sub _build_comments {
                 \.([a-z]+)          # extension
             $/ix;
 
+            my $time      = timelocal($6, $5, $4, $3, $2 - 1, $1);
+            my $extension = lc($7);
+
             my @lines  = read_file("$direct/$dir/$file");
             my $author = shift(@lines);
             my $mail   = shift(@lines);
@@ -62,9 +65,6 @@ sub _build_comments {
             $mail   =~ s/Mail:\s//;
             $url    =~ s/Url:\s//;
             $hidden =~ s/Hidden:\s//;
-
-            my $time      = timelocal($6, $5, $4, $3, $2 - 1, $1);
-            my $extension = lc($7);
 
             my $body;
             foreach my $line (@lines) {

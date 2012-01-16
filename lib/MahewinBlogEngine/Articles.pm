@@ -63,17 +63,17 @@ sub _build_articles {
             \.([a-z]+)          # extension
         $/ix;
 
+        #Build date, url part and extension
+        my $time      = timelocal(0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
+        my $url       = lc($6);
+        my $extension = lc($7);
+
         my @lines = read_file("$directory/$file", binmode => ':utf8');
         my $title = shift(@lines);
         my $tags  = shift(@lines);
 
         $title =~ s/Title:\s//;
         $tags  =~ s/Tags:\s//;
-
-        #Build date, url part and extension
-        my $time      = timelocal(0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
-        my $url       = lc($6);
-        my $extension = lc($7);
 
         my $body;
         foreach my $line (@lines) {
