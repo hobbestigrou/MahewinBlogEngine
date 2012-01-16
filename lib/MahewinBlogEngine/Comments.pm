@@ -132,7 +132,7 @@ sub add_comment {
     my $mail   = $params->{mail} // '';
     my $body   = $params->{body} // '';
     my $url    = $params->{url} // '';
-    my $hidden = $params->{hidden} // '';
+    my $hidden = $params->{hidden} // 1;
 
     my @data = ( "Name: $name", "\n", "Mail: $mail", "\n", "Url: $url", "\n", "Hidden: 1", "\n", $params->{body} );
     write_file( $filename, { binmode => ':utf8' }, @data );
