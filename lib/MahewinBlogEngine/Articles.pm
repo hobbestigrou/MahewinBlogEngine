@@ -32,6 +32,19 @@ has 'directory' => (
     required => 1
 );
 
+=attr date_format
+
+ro, Str. Date format used to display, POSIX strftime.
+Default value is %x %T.
+
+=cut
+
+has 'date_format' => (
+    is => 'ro',
+    isa => 'Str',
+    default => "%x %T"
+);
+
 sub _build_articles {
     my ( $self ) = @_;
 
@@ -73,7 +86,7 @@ sub _build_articles {
         push(@articles, {
             title   => $title,
             tags    => \@tags,
-            date    => POSIX::strftime("%x %T", gmtime($time)),
+            date    => POSIX::strftime($self->date_format, gmtime($time)),
             content => $content,
             link    => $url
         });
