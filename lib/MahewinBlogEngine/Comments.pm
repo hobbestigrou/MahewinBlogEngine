@@ -138,14 +138,7 @@ sub add_comment {
     my @data = ( "Name: $name", "\n", "Mail: $mail", "\n", "Url: $url", "\n", "Hidden: $hidden", "\n", $params->{body} );
     write_file( $filename, { binmode => ':utf8' }, @data );
 
-    push($self->_comments, {
-        author      => $name,
-        mail        => $mail,
-        url         => $url,
-        hidden      => $hidden,
-        url_article => $id_article,
-        body        => $body,
-    });
+    $self->clear_comments;
 
     return;
 }
