@@ -15,7 +15,8 @@ has '_comments' => (
     is      => 'ro',
     isa     => 'ArrayRef',
     lazy    => 1,
-    builder => '_build_comments'
+    builder => '_build_comments',
+    clearer => 'clear_comments'
 );
 
 =attr directory

@@ -17,7 +17,8 @@ has '_articles' => (
     is      => 'ro',
     isa     => 'ArrayRef',
     lazy    => 1,
-    builder => '_build_articles'
+    builder => '_build_articles',
+    clearer => 'clear_articles'
 );
 
 =attr directory
