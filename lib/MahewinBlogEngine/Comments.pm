@@ -12,11 +12,12 @@ use Time::Local qw(timelocal);
 use MahewinBlogEngine::Utils qw(converted_text);
 
 has '_comments' => (
-    is      => 'ro',
-    isa     => 'ArrayRef',
-    lazy    => 1,
-    builder => '_build_comments',
-    clearer => 'clear_comments'
+    is       => 'ro',
+    isa      => 'ArrayRef',
+    lazy     => 1,
+    builder  => '_build_comments',
+    clearer  => 'clear_comments',
+    init_arg => undef
 );
 
 =attr directory

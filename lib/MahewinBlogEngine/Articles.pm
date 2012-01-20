@@ -14,11 +14,12 @@ use MahewinBlogEngine::Utils qw(converted_text);
 use Time::Local qw(timelocal);
 
 has '_articles' => (
-    is      => 'ro',
-    isa     => 'ArrayRef',
-    lazy    => 1,
-    builder => '_build_articles',
-    clearer => 'clear_articles'
+    is       => 'ro',
+    isa      => 'ArrayRef',
+    lazy     => 1,
+    builder  => '_build_articles',
+    clearer  => 'clear_articles',
+    init_arg => undef
 );
 
 =attr directory
