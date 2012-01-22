@@ -47,6 +47,19 @@ has 'date_format' => (
     default => "%x %T"
 );
 
+=attr encoding
+
+rw, Str. Indicate the encoding file. Default is utf8.
+
+=cut
+
+has 'encoding' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'utf8'
+);
+
+
 sub _build_articles {
     my ( $self ) = @_;
 
@@ -70,7 +83,7 @@ sub _build_articles {
         my $url       = lc($6);
         my $extension = lc($7);
 
-        my @lines = read_file("$directory/$file", binmode => ':utf8');
+        my @lines = read_file("$directory/$file", binmode => ':' . $self->encoding);
         my $title = shift(@lines);
         my $tags  = shift(@lines);
 

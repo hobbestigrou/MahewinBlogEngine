@@ -32,6 +32,18 @@ has 'directory' => (
     required => 1
 );
 
+=attr encoding
+
+rw, Str. Indicate the encoding file. Default is utf8.
+
+=cut
+
+has 'encoding' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'utf8'
+);
+
 sub _build_comments {
     my ( $self ) = @_;
 
@@ -136,7 +148,7 @@ sub add_comment {
     my $hidden = $params->{hidden} // 1;
 
     my @data = ( "Name: $name", "\n", "Mail: $mail", "\n", "Url: $url", "\n", "Hidden: $hidden", "\n", $params->{body} );
-    write_file( $filename, { binmode => ':utf8' }, @data );
+    write_file( $filename, { binmode => ':' . $self->encoding }, @data );
 
     $self->clear_comments;
 
