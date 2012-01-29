@@ -83,6 +83,8 @@ sub _build_articles {
         my $extension = lc($8);
 
         my @lines = read_file("$directory/$file", binmode => ':' . $self->encoding);
+        _validate_meta(@lines);
+
         my $title = shift(@lines);
         my $tags  = shift(@lines);
 
@@ -107,6 +109,17 @@ sub _build_articles {
     }
 
     \@articles;
+}
+
+sub _validate_meta {
+    my ( @file_content ) = @_;
+
+    if ( $file_content[0] !~ m/^Title:\s+\w+/
+      || $file_content[1] !~ m/^Tags:/) {
+        croak 'Meta not valid';
+    }
+
+    return;
 }
 
 =method articles_list
