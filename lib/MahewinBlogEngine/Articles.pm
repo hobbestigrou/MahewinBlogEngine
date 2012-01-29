@@ -41,8 +41,8 @@ Default value is %x %T.
 =cut
 
 has 'date_format' => (
-    is => 'ro',
-    isa => 'Str',
+    is      => 'ro',
+    isa     => 'Str',
     default => "%x %T"
 );
 
@@ -57,7 +57,6 @@ has 'encoding' => (
     isa     => 'Str',
     default => 'utf8'
 );
-
 
 sub _build_articles {
     my ( $self ) = @_;
