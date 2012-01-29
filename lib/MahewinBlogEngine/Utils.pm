@@ -25,8 +25,8 @@ sub converted_text {
         load $class;
     }
     else {
-        load Renderer;
         $class = 'MahewinBlogEngine::Renderer';
+        load $class;
     }
 
     my $renderer = $class->new();
