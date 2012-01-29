@@ -5,7 +5,6 @@ use warnings;
 
 use Moose;
 
-
 use POSIX;
 use Carp;
 
@@ -74,14 +73,15 @@ sub _build_articles {
             -(\d\d)             # month
             -(\d\d)             # day
             (?:-(\d\d)-(\d\d))? # optional: hour and minute
+            (?:-(\d\d))?        # optional: second
             _(.*)               # url part
             \.([a-z]+)          # extension
         $/ix;
 
         #Build date, url part and extension
-        my $time      = timelocal(0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
-        my $url       = lc($6);
-        my $extension = lc($7);
+        my $time      = timelocal($6 // 0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
+        my $url       = lc($7);
+        my $extension = lc($8);
 
         my @lines = read_file("$directory/$file", binmode => ':' . $self->encoding);
         my $title = shift(@lines);
