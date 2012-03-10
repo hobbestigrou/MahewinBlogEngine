@@ -115,7 +115,7 @@ sub _validate_meta {
     my ( @file_content ) = @_;
 
     if ( $file_content[0] !~ m/^Title:\s+\w+/
-      || $file_content[1] !~ m/^Tags:/) {
+      || $file_content[1] !~ m/^Tags:(?:\s\w+)/) {
         croak 'Meta not valid';
     }
 
