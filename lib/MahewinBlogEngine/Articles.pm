@@ -4,11 +4,11 @@ use strict;
 use warnings;
 
 use Moose;
+use MooseX::Types::Path::Class qw(Dir File);
 
 use POSIX;
 use Carp;
 
-use File::Slurp;
 use MahewinBlogEngine::Utils qw(converted_text);
 use Time::Local qw(timelocal);
 
@@ -29,8 +29,9 @@ rw, required, Str. The directory contain articles.
 
 has 'directory' => (
     is       => 'rw',
-    isa      => 'Str',
-    required => 1
+    isa      => Dir,
+    required => 1,
+    coerce   => 1,
 );
 
 =attr date_format
@@ -61,13 +62,14 @@ has 'encoding' => (
 sub _build_articles {
     my ( $self ) = @_;
 
-    my $directory = $self->directory;
-    my @files     = read_dir($directory);
+    #my $directory = $self->directory;
+    my @files     = $self->directory->children;
     my @files_tri = sort { $b cmp $a } @files;
     my @articles;
 
     foreach my $file (@files_tri) {
-        croak 'Filename not parseable: ' . $file unless $file =~ /^
+        my $relative_path = File::Spec->abs2rel($file, $file->parent);
+        croak 'Filename not parseable: ' . $relative_path unless $relative_path =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
             -(\d\d)             # day
@@ -82,7 +84,8 @@ sub _build_articles {
         my $url       = lc($7);
         my $extension = lc($8);
 
-        my @lines = read_file("$directory/$file", binmode => ':' . $self->encoding);
+        my $encoding = $self->encoding;
+        my @lines = $file->slurp(chomp => 0, iomode => "<:encoding($encoding)");
         _validate_meta(@lines);
 
         my $title = shift(@lines);

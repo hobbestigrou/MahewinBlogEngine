@@ -7,9 +7,10 @@ use Moose;
 
 use Carp;
 
-use File::Slurp;
 use Time::Local qw(timelocal);
 use MahewinBlogEngine::Utils qw(converted_text);
+use MooseX::Types::Path::Class qw(Dir File);
+use File::Spec;
 
 has '_comments' => (
     is       => 'ro',
@@ -28,8 +29,9 @@ rw, required, Str. The directory contain comments.
 
 has 'directory' => (
     is       => 'rw',
-    isa      => 'Str',
-    required => 1
+    isa      => Dir,
+    required => 1,
+    coerce   => 1,
 );
 
 =attr encoding
@@ -47,16 +49,13 @@ has 'encoding' => (
 sub _build_comments {
     my ( $self ) = @_;
 
-    my $direct    = $self->directory;
-    my @directory = read_dir($direct);
     my @comments;
+    $self->directory->recurse( callback => sub {
+       my ( $file ) = @_;
 
-    foreach my $dir (@directory) {
-        opendir(COMMENTS, "$direct/$dir");
-
-        while(defined (my $file = readdir(COMMENTS))) {
-            next if $file eq '.' || $file eq '..';
-            croak 'Filename not parseable: ' . $file unless $file =~ /^
+       if ( -f $file ) {
+           my $relative_path = File::Spec->abs2rel($file, $file->parent);
+           croak 'Filename not parseable: ' . $relative_path unless $relative_path =~ /^
                 (\d\d\d\d)          # year
                 -(\d\d)             # month
                 -(\d\d)             # day
@@ -69,7 +68,8 @@ sub _build_comments {
             my $time      = timelocal($6, $5, $4, $3, $2 - 1, $1);
             my $extension = lc($7);
 
-            my @lines  = read_file("$direct/$dir/$file");
+            my @lines    = $file->slurp(chomp => 0);
+
             my $author = shift(@lines);
             my $mail   = shift(@lines);
             my $url    = shift(@lines);
@@ -90,17 +90,15 @@ sub _build_comments {
             my $content = converted_text($body, $extension);
 
             push(@comments, {
-                    author      => $author,
-                    mail        => $mail,
-                    url         => $url,
-                    hidden      => $hidden,
-                    url_article => $dir,
-                    body        => $content,
-                });
-            }
-
-            closedir(COMMENTS);
-        }
+                author      => $author,
+                mail        => $mail,
+                url         => $url,
+                hidden      => $hidden // 0,
+                url_article => $file->dir->{dirs}->[-1],
+                body        => $content,
+            });
+       }
+    });
 
     \@comments;
 }
@@ -136,10 +134,11 @@ sub add_comment {
     $min         = $min =~ m/^\d$/ ? "0$min" : $min;
     $hour        = $hour =~ m/^\d$/ ? "0$hour" : $hour;
 
-    my $directory = $self->directory;
-    my $filename  = "$directory/$id_article/$year-$mon-$day-$hour-$min-$sec.md";
+    my $directory = $self->directory->stringify . '/' . "$id_article";
+    my $filename  = "$id_article/$year-$mon-$day-$hour-$min-$sec.md";
+    my $file      = $self->directory->file($filename);
 
-    mkdir("$directory/$id_article") unless -e "$directory/$id_article";
+    mkdir($directory) unless -e $directory;
 
     my $name   = $params->{name} // 'Anonymous';
     my $mail   = $params->{mail} // '';
@@ -147,8 +146,13 @@ sub add_comment {
     my $url    = $params->{url} // '';
     my $hidden = $params->{hidden} // 1;
 
-    my @data = ( "Name: $name", "\n", "Mail: $mail", "\n", "Url: $url", "\n", "Hidden: $hidden", "\n", $params->{body} );
-    write_file( $filename, { binmode => ':' . $self->encoding }, @data );
+    my $encoding = $self->encoding;
+    my $fh = $file->open(">:encoding($encoding)");
+    print $fh "Name: $name" . "\n";
+    print $fh "Mail: $mail" . "\n";
+    print $fh "Url: $url" . "\n";
+    print $fh "Hidden: $hidden" . "\n";
+    print $fh $params->{body} if $params->{body};
 
     $self->clear_comments;
 
