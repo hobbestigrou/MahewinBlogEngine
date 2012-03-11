@@ -4,13 +4,15 @@ use strict;
 use warnings;
 
 use Moose;
-use MooseX::Types::Path::Class qw(Dir File);
 
 use POSIX;
 use Carp;
 
 use MahewinBlogEngine::Utils qw(converted_text);
 use Time::Local qw(timelocal);
+use File::Spec;
+
+with 'MahewinBlogEngine::Role::File';
 
 has '_articles' => (
     is       => 'ro',
@@ -19,19 +21,6 @@ has '_articles' => (
     builder  => '_build_articles',
     clearer  => 'clear_articles',
     init_arg => undef
-);
-
-=attr directory
-
-rw, required, Str. The directory contain articles.
-
-=cut
-
-has 'directory' => (
-    is       => 'rw',
-    isa      => Dir,
-    required => 1,
-    coerce   => 1,
 );
 
 =attr date_format
@@ -45,18 +34,6 @@ has 'date_format' => (
     is      => 'ro',
     isa     => 'Str',
     default => "%x %T"
-);
-
-=attr encoding
-
-rw, Str. Indicate the encoding file. Default is utf8.
-
-=cut
-
-has 'encoding' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => 'utf8'
 );
 
 sub _build_articles {

@@ -9,8 +9,9 @@ use Carp;
 
 use Time::Local qw(timelocal);
 use MahewinBlogEngine::Utils qw(converted_text);
-use MooseX::Types::Path::Class qw(Dir File);
 use File::Spec;
+
+with 'MahewinBlogEngine::Role::File';
 
 has '_comments' => (
     is       => 'ro',
@@ -19,31 +20,6 @@ has '_comments' => (
     builder  => '_build_comments',
     clearer  => 'clear_comments',
     init_arg => undef
-);
-
-=attr directory
-
-rw, required, Str. The directory contain comments.
-
-=cut
-
-has 'directory' => (
-    is       => 'rw',
-    isa      => Dir,
-    required => 1,
-    coerce   => 1,
-);
-
-=attr encoding
-
-rw, Str. Indicate the encoding file. Default is utf8.
-
-=cut
-
-has 'encoding' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => 'utf8'
 );
 
 sub _build_comments {
