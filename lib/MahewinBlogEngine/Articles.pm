@@ -39,7 +39,6 @@ has 'date_format' => (
 sub _build_articles {
     my ( $self ) = @_;
 
-    #my $directory = $self->directory;
     my @files     = $self->directory->children;
     my @files_tri = sort { $b cmp $a } @files;
     my @articles;
