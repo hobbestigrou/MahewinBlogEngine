@@ -156,4 +156,17 @@ sub get_articles_by_tag {
     return \@articles;
 }
 
+sub search {
+    my ( $self, $str ) = @_;
+
+    my @results;
+    foreach my $article ( @{$self->_articles} ) {
+        if ( $article->{title} =~ /$str/i || $article->{content} =~ /$str/i ) {
+            push(@results, $article);
+        }
+    }
+
+    return \@results // [];
+}
+
 1;
