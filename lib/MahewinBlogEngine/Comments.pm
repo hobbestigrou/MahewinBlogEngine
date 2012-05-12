@@ -118,7 +118,7 @@ sub add_comment {
 
     my $name   = $params->{name} // 'Anonymous';
     my $mail   = $params->{mail} // '';
-    my $body   = $params->{body} // '';
+    my $body   = $params->{body} =~ s/\cM//g // '';
     my $url    = $params->{url} // '';
     my $hidden = $params->{hidden} // 1;
 
