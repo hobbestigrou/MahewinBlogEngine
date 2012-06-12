@@ -9,7 +9,7 @@ use POSIX;
 use Carp;
 use File::Spec;
 
-use MahewinBlogEngine::Utils qw(converted_text);
+use MahewinBlogEngine::Renderer;
 use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
@@ -75,8 +75,9 @@ sub _build_articles {
             $body .= $line;
         }
 
-        my $content = converted_text($body, $extension);
-        my @tags    = split(',', $tags);
+        my $renderer = MahewinBlogEngine::Renderer->new();
+        my $content  = $renderer->renderer($body, $extension);
+        my @tags     = split(',', $tags);
 
         push(@articles, {
             title   => $title,

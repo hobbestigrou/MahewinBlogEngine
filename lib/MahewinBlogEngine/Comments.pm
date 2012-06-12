@@ -9,7 +9,7 @@ use Carp;
 use File::Spec;
 
 use Time::Local qw(timelocal);
-use MahewinBlogEngine::Utils qw(converted_text);
+use MahewinBlogEngine::Renderer;
 
 with 'MahewinBlogEngine::Role::File';
 
@@ -63,7 +63,9 @@ sub _build_comments {
 
             $body //= '';
 
-            my $content = converted_text($body, $extension);
+            my $renderer = MahewinBlogEngine::Renderer->new();
+            my $content  = $renderer->renderer($body, $extension);
+
 
             push(@comments, {
                 author      => $author,
