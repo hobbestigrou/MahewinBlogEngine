@@ -11,6 +11,8 @@ use File::Spec;
 use Time::Local qw(timelocal);
 use MahewinBlogEngine::Renderer;
 
+use POSIX qw(strftime);
+
 with 'MahewinBlogEngine::Role::File';
 
 has '_comments' => (
@@ -102,18 +104,10 @@ sub get_comments_by_article {
 sub add_comment {
     my ( $self, $id_article , $params ) = @_;
 
-    my ( $sec, $min, $hour, $day, $m, $y ) = localtime;
-
-    my $mon      = $m + 1;
-    my $year     = $y + 1900;
-    $mon         = $mon =~ m/^\d$/ ? "0$mon" : $mon;
-    $day         =~ s/^\d$/0$day/;
-    $sec         = $sec =~ m/^\d$/ ? "0$sec" : $sec;
-    $min         = $min =~ m/^\d$/ ? "0$min" : $min;
-    $hour        = $hour =~ m/^\d$/ ? "0$hour" : $hour;
+    my $now = strftime "%Y-%m-%d-%H-%M-%S", localtime;
 
     my $directory = $self->directory->stringify . '/' . "$id_article";
-    my $filename  = "$id_article/$year-$mon-$day-$hour-$min-$sec.md";
+    my $filename  = "$id_article/$now.md";
     my $file      = $self->directory->file($filename);
 
     mkdir($directory) unless -e $directory;
