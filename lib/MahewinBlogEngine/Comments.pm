@@ -15,19 +15,9 @@ use POSIX qw(strftime);
 
 with 'MahewinBlogEngine::Role::File';
 
-has '_comments' => (
-    is       => 'ro',
-    isa      => 'ArrayRef',
-    lazy     => 1,
-    builder  => '_build_comments',
-    clearer  => 'clear_comments',
-    init_arg => undef
-);
-
-sub _build_comments {
+sub _inject_comment {
     my ( $self ) = @_;
 
-    my @comments;
     $self->directory->recurse( callback => sub {
        my ( $file ) = @_;
 
@@ -68,8 +58,7 @@ sub _build_comments {
             my $renderer = MahewinBlogEngine::Renderer->new();
             my $content  = $renderer->renderer($body, $extension);
 
-
-            push(@comments, {
+            $self->_cache->_add_comment({
                 author      => $author,
                 mail        => $mail,
                 url         => $url,
@@ -77,28 +66,20 @@ sub _build_comments {
                 url_article => $file->dir->{dirs}->[-1],
                 body        => $content,
             });
-       }
+        }
     });
-
-    \@comments;
 }
 
 sub comment_list {
     my ( $self ) = @_;
 
-    return $self->_comments;
+    return $self->_cache->_comment_list;
 }
 
 sub get_comments_by_article {
     my ( $self, $id_article ) = @_;
 
-    my @comments;
-
-    foreach my $comment ( @{$self->_comments} ) {
-        push(@comments, $comment) if $comment->{url_article} eq $id_article;
-    }
-
-    return \@comments;
+    return $self->_cache->_get_comments_by_article($id_article);
 }
 
 sub add_comment {
@@ -125,8 +106,6 @@ sub add_comment {
     print $fh "Url: $url" . "\n";
     print $fh "Hidden: $hidden" . "\n";
     print $fh $params->{body} if $params->{body};
-
-    $self->clear_comments;
 
     return;
 }

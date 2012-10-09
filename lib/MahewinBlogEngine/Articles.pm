@@ -14,15 +14,6 @@ use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
 
-has '_articles' => (
-    is       => 'ro',
-    isa      => 'ArrayRef',
-    lazy     => 1,
-    builder  => '_build_articles',
-    clearer  => 'clear_articles',
-    init_arg => undef
-);
-
 =attr date_format
 
 ro, Str. Date format used to display, POSIX strftime.
@@ -36,12 +27,11 @@ has 'date_format' => (
     default => "%x %T"
 );
 
-sub _build_articles {
+sub _inject_article {
     my ( $self ) = @_;
 
     my @files     = $self->directory->children;
     my @files_tri = sort { $b cmp $a } @files;
-    my @articles;
 
     foreach my $file (@files_tri) {
         my $relative_path = File::Spec->abs2rel($file, $file->parent);
@@ -64,11 +54,13 @@ sub _build_articles {
         my @lines = $file->slurp(chomp => 0, iomode => "<:encoding($encoding)");
         _validate_meta(@lines);
 
-        my $title = shift(@lines);
-        my $tags  = shift(@lines);
+        my $title  = shift(@lines);
+        my $tags   = shift(@lines);
+        my $update = shift(@lines);
 
-        $title =~ s/Title:\s//;
-        $tags  =~ s/Tags:\s//;
+        $title  =~ s/Title:\s//;
+        $tags   =~ s/Tags:\s//;
+        $update =~ s/Update:\s+//;
 
         my $body;
         foreach my $line (@lines) {
@@ -79,17 +71,16 @@ sub _build_articles {
         my $content  = $renderer->renderer($body, $extension);
         my @tags     = split(',', $tags);
 
-        push(@articles, {
+        $self->_cache->_add_article({
             title   => $title,
             tags    => \@tags,
+            update  => int($update),
             date    => POSIX::strftime($self->date_format, gmtime($time)),
             epoch   => $time,
             content => $content,
             link    => $url
         });
     }
-
-    \@articles;
 }
 
 sub _validate_meta {
@@ -115,7 +106,8 @@ Return list of all articles
 sub article_list {
     my ( $self ) = @_;
 
-    return $self->_articles;
+    $self->_inject_article;
+    return $self->_sort($self->_cache->_article_list);
 }
 
 =method article_details
@@ -130,11 +122,7 @@ Return information of article.
 sub article_details {
     my ( $self, $url ) = @_;
 
-    foreach my $article ( @{$self->_articles} ) {
-        return $article if $article->{link} eq $url;
-    }
-
-    return;
+    return $self->_cache->_article_details($url);
 }
 
 =method get_articles_by_tag
@@ -149,26 +137,20 @@ Return a list of articles filter by tag specified.
 sub get_articles_by_tag {
     my ( $self, $tag ) = @_;
 
-    my @articles;
-
-    foreach my $article ( @{$self->_articles} ) {
-        push(@articles, $article) if grep(/$tag/, @{$article->{tags}});
-    }
-
-    return \@articles;
+    return $self->_sort($self->_cache->_get_articles_by_tag($tag));
 }
 
 sub search {
     my ( $self, $str ) = @_;
 
-    my @results;
-    foreach my $article ( @{$self->_articles} ) {
-        if ( $article->{title} =~ /$str/i || $article->{content} =~ /$str/i ) {
-            push(@results, $article);
-        }
-    }
+    return $self->_sort($self->_cache->_search($str));
+}
 
-    return \@results // [];
+sub _sort {
+    my ( $self, $articles ) = @_;
+
+    my @sort = sort { $b->{epoch} <=> $a->{epoch} } @{$articles};
+    return \@sort;
 }
 
 1;
