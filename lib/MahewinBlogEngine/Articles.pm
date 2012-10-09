@@ -83,6 +83,7 @@ sub _build_articles {
             title   => $title,
             tags    => \@tags,
             date    => POSIX::strftime($self->date_format, gmtime($time)),
+            epoch   => $time,
             content => $content,
             link    => $url
         });
