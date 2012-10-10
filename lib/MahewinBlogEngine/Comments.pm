@@ -62,8 +62,7 @@ sub _inject_comment {
 
             $body //= '';
 
-            my $renderer = MahewinBlogEngine::Renderer->new();
-            my $content  = $renderer->renderer($body, $extension);
+            my $content  = $self->_renderer->renderer($body, $extension);
 
             $self->_cache->_add_comment({
                 author      => $author,

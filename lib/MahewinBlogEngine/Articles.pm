@@ -9,7 +9,6 @@ use POSIX;
 use Carp;
 use File::Spec;
 
-use MahewinBlogEngine::Renderer;
 use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
@@ -67,8 +66,7 @@ sub _inject_article {
             $body .= $line;
         }
 
-        my $renderer = MahewinBlogEngine::Renderer->new();
-        my $content  = $renderer->renderer($body, $extension);
+        my $content  = $self->_renderer->renderer($body, $extension);
         my @tags     = split(',', $tags);
 
         $self->_cache->_add_article({
