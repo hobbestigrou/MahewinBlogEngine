@@ -4,6 +4,7 @@ use Moose::Role;
 use MooseX::Types::Path::Class qw(Dir File);
 
 use MahewinBlogEngine::Cache::Memory;
+use MahewinBlogEngine::Renderer
 
 =attr directory
 
@@ -30,6 +31,13 @@ has 'encoding' => (
     default => 'utf8'
 );
 
+has _renderer => (
+    is      => 'ro',
+    isa     => 'MahewinBlogEngine::Renderer',
+    lazy    => 1,
+    builder => '_build_renderer',
+);
+
 has _cache => (
     is      => 'ro',
     isa     => 'MahewinBlogEngine::Cache::Memory',
@@ -39,6 +47,10 @@ has _cache => (
 
 sub _build_cache {
     return MahewinBlogEngine::Cache::Memory->new;
+}
+
+sub _build_renderer {
+    return MahewinBlogEngine::Renderer->new();
 }
 
 1;
