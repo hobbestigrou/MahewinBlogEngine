@@ -26,6 +26,13 @@ has 'date_format' => (
     default => "%x %T"
 );
 
+sub BUILD {
+    my ( $self ) = @_;
+
+    $self->_inject_article;
+    return;
+}
+
 sub _inject_article {
     my ( $self ) = @_;
 
