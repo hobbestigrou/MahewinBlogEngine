@@ -3,7 +3,7 @@ package MahewinBlogEngine::Cache::Memory;
 use Moose;
 
 use MahewinBlogEngine::Cache::Memory::Article;
-use Data::Dumper;
+use MahewinBlogEngine::Cache::Memory::Comment;
 
 has _articles => (
     traits  => ['Array'],
@@ -29,8 +29,7 @@ sub _add_article {
     my ( $self, $article ) = @_;
 
     if ( $self->_article_details($article->{link})
-        && $article->{update}
-        && $self->_article_details($article->{link}->{nb_comments}) != $article->{nb_comments}) {
+        && $article->{update} ) {
         $self->_update_article( $article );
         return;
     }
@@ -100,9 +99,41 @@ sub search {
 sub _add_comment {
     my ( $self, $comment ) = @_;
 
-    $self->add_art(MahewinBlogEngine::Cache::Memory::Comment->new(%{$comment}));
+    $self->_show_comment($comment);
+    $self->_is_comment_exist($comment)
+        and return;
+
+    $self->add_com(MahewinBlogEngine::Cache::Memory::Comment->new(%{$comment}));
     return;
 }
+
+sub _is_comment_exist {
+    my ( $self, $comment ) = @_;
+
+    my $key = $comment->{author} . '_' . $comment->{epoch};
+    foreach my $com (@{$self->_comments}) {
+        $key eq $com->{key}
+            and return 1;
+    }
+
+    return 0;
+}
+
+sub _show_comment {
+    my ( $self, $comment ) = @_;
+
+    my $key = $comment->{author} . '_' . $comment->{epoch};
+    foreach my $com (@{$self->_comments}) {
+        if ( $key eq $com->{key}
+            && $com->{hidden}
+            && $com->{hidden} != $comment->{hidden} ) {
+            $com->{hidden} = $comment->{hidden};
+        }
+    }
+
+    return;
+}
+
 
 sub _comment_list {
     my ( $self ) = @_;
@@ -116,6 +147,7 @@ sub _get_comments_by_article {
     my @comments;
 
     foreach my $comment ( @{$self->_comments} ) {
+        $self->_show_comment($comment);
         push(@comments, $comment) if $comment->{url_article} eq $id_article;
     }
 
