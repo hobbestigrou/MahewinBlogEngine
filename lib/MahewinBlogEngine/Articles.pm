@@ -13,19 +13,6 @@ use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
 
-=attr date_format
-
-ro, Str. Date format used to display, POSIX strftime.
-Default value is %x %T.
-
-=cut
-
-has 'date_format' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => "%x %T"
-);
-
 sub BUILD {
     my ( $self ) = @_;
 

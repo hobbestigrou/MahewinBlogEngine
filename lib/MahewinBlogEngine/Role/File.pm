@@ -31,6 +31,19 @@ has 'encoding' => (
     default => 'utf8'
 );
 
+=attr date_format
+
+ro, Str. Date format used to display, POSIX strftime.
+Default value is %x %T.
+
+=cut
+
+has 'date_format' => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => "%x %T"
+);
+
 has _renderer => (
     is      => 'ro',
     isa     => 'MahewinBlogEngine::Renderer',
