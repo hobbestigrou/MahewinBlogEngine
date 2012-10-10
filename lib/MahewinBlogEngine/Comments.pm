@@ -15,6 +15,13 @@ use POSIX qw(strftime);
 
 with 'MahewinBlogEngine::Role::File';
 
+sub BUILD {
+    my ( $self ) = @_;
+
+    $self->_inject_comment;
+    return;
+}
+
 sub _inject_comment {
     my ( $self ) = @_;
 
@@ -61,8 +68,10 @@ sub _inject_comment {
             $self->_cache->_add_comment({
                 author      => $author,
                 mail        => $mail,
+                epoch       => $time,
+                key         => $author . '_' . $time,
                 url         => $url,
-                hidden      => $hidden // 0,
+                hidden      => int($hidden) // 0,
                 url_article => $file->dir->{dirs}->[-1],
                 body        => $content,
             });
@@ -73,12 +82,14 @@ sub _inject_comment {
 sub comment_list {
     my ( $self ) = @_;
 
+    $self->_inject_comment;
     return $self->_cache->_comment_list;
 }
 
 sub get_comments_by_article {
     my ( $self, $id_article ) = @_;
 
+    $self->_inject_comment;
     return $self->_cache->_get_comments_by_article($id_article);
 }
 
@@ -97,7 +108,7 @@ sub add_comment {
     my $mail   = $params->{mail} // '';
     my $body   = $params->{body} =~ s/\cM//g // '';
     my $url    = $params->{url} // '';
-    my $hidden = $params->{hidden} // 1;
+    my $hidden = int($params->{hidden}) // 1;
 
     my $encoding = $self->encoding;
     my $fh = $file->open(">:encoding($encoding)");
