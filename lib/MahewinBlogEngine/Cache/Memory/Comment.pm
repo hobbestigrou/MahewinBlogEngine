@@ -12,6 +12,16 @@ has mail => (
     isa => 'Str',
 );
 
+has epoch => (
+    is  => 'rw',
+    isa => 'Int',
+);
+
+has key => (
+    is  => 'rw',
+    isa => 'Str',
+);
+
 has url => (
     is  => 'ro',
     isa => 'Str',
