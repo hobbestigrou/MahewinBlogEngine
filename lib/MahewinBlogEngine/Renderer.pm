@@ -5,6 +5,7 @@ use Carp;
 
 use aliased 'MahewinBlogEngine::Renderer::Markdown';
 use aliased 'MahewinBlogEngine::Renderer::HTML';
+use MahewinBlogEngine::Exceptions;
 use Data::Dumper;
 
 has _renderer_avalaible => (
@@ -38,7 +39,7 @@ sub renderer {
         return $rend->($text);
     }
     else {
-        croak "No renderer for this format $format"
+        throw_format_not_supported error => "No renderer for this format $format ";
     }
 
     return;

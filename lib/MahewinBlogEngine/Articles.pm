@@ -9,6 +9,7 @@ use POSIX;
 use Carp;
 use File::Spec;
 
+use MahewinBlogEngine::Exceptions;
 use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
@@ -28,7 +29,7 @@ sub _inject_article {
 
     foreach my $file (@files_tri) {
         my $relative_path = File::Spec->abs2rel($file, $file->parent);
-        croak 'Filename not parseable: ' . $relative_path unless $relative_path =~ /^
+        filename_not_parseable error => 'Filename not parseable: ' . "$relative_path " unless $relative_path =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
             -(\d\d)             # day
@@ -80,7 +81,7 @@ sub _validate_meta {
 
     if ( $file_content[0] !~ m/^Title:\s+\w+/
       || $file_content[1] !~ m/^Tags:(?:\s\w+)/) {
-        croak 'Meta not valid';
+        meta_not_valid error => 'Meta not valid';
     }
 
     return;

@@ -9,6 +9,8 @@ use Carp;
 use File::Spec;
 
 use Time::Local qw(timelocal);
+
+use MahewinBlogEngine::Exceptions;
 use MahewinBlogEngine::Renderer;
 
 use POSIX qw(strftime);
@@ -30,7 +32,7 @@ sub _inject_comment {
 
        if ( -f $file ) {
            my $relative_path = File::Spec->abs2rel($file, $file->parent);
-           croak 'Filename not parseable: ' . $relative_path unless $relative_path =~ /^
+           filename_not_parseable error => 'Filename not parseable: ' . "$relative_path " unless $relative_path =~ /^
                 (\d\d\d\d)          # year
                 -(\d\d)             # month
                 -(\d\d)             # day
