@@ -3,7 +3,7 @@ package MahewinBlogEngine::Role::File;
 use Moose::Role;
 use MooseX::Types::Path::Class qw(Dir File);
 
-use MahewinBlogEngine::Cache::Memory;
+use CHI;
 use MahewinBlogEngine::Renderer
 
 =attr directory
@@ -51,19 +51,20 @@ has _renderer => (
     builder => '_build_renderer',
 );
 
+
 has _cache => (
     is      => 'ro',
-    isa     => 'MahewinBlogEngine::Cache::Memory',
+    isa     => 'CHI::Driver',
     lazy    => 1,
     builder => '_build_cache',
 );
 
-sub _build_cache {
-    return MahewinBlogEngine::Cache::Memory->new;
-}
-
 sub _build_renderer {
     return MahewinBlogEngine::Renderer->new();
+}
+
+sub _build_cache {
+    return CHI->new( driver => 'Memory', global => 1 );
 }
 
 1;

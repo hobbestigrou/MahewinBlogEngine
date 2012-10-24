@@ -14,11 +14,53 @@ use Time::Local qw(timelocal);
 
 with 'MahewinBlogEngine::Role::File';
 
+has _last_file => (
+    is       => 'rw',
+    isa      => 'HashRef',
+    default  => sub { {} },
+    init_arg => undef,
+);
+
+before _get_or_create_cache => sub {
+    my ( $self ) = @_;
+
+    foreach my $file ( $self->directory->children ) {
+        if ( exists $self->_last_file->{$file} ) {
+            while ( my ( $key, $value ) = each %{$self->_last_file}) {
+                my ( $dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($file);
+                if ( $key eq $file ) {
+                    $mtime == $value
+                        and $self->_cache->remove('articles');
+                }
+            }
+        }
+        else {
+            $self->_cache->remove('articles');
+        }
+    }
+
+    return;
+};
+
 sub BUILD {
     my ( $self ) = @_;
 
-    $self->_inject_article;
+    $self->_get_or_create_cache;
     return;
+}
+
+sub _get_or_create_cache {
+    my ( $self ) = @_;
+
+    my $cache = $self->_cache->get('articles');
+
+    if ( !defined($cache) ) {
+        my @articles = $self->_inject_article;
+        $self->_cache->set( 'articles', \@articles );
+        $cache = $self->_cache->get('articles')
+    }
+
+    return $cache;
 }
 
 sub _inject_article {
@@ -26,6 +68,7 @@ sub _inject_article {
 
     my @files     = $self->directory->children;
     my @files_tri = sort { $b cmp $a } @files;
+    my @articles;
 
     foreach my $file (@files_tri) {
         my $relative_path = File::Spec->abs2rel($file, $file->parent);
@@ -39,6 +82,11 @@ sub _inject_article {
             \.([a-z]+)          # extension
         $/ix;
 
+        if ( ! exists $self->_last_file->{$file} ) {
+            my ( $dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($file);
+            $self->_last_file->{$file} = $mtime;
+        }
+
         #Build date, url part and extension
         my $time      = timelocal($6 // 0, $5 // 0, $4 // 0, $3, $2 - 1, $1);
         my $url       = lc($7);
@@ -50,11 +98,9 @@ sub _inject_article {
 
         my $title  = shift(@lines);
         my $tags   = shift(@lines);
-        my $update = shift(@lines);
 
         $title  =~ s/Title:\s//;
         $tags   =~ s/Tags:\s//;
-        $update =~ s/Update:\s+//;
 
         my $body;
         foreach my $line (@lines) {
@@ -64,16 +110,17 @@ sub _inject_article {
         my $content  = $self->_renderer->renderer($body, $extension);
         my @tags     = split(',', $tags);
 
-        $self->_cache->_add_article({
+        push(@articles, {
             title   => $title,
             tags    => \@tags,
-            update  => int($update),
             date    => POSIX::strftime($self->date_format, gmtime($time)),
             epoch   => $time,
             content => $content,
             link    => $url
         });
     }
+
+    return @articles;
 }
 
 sub _validate_meta {
@@ -99,8 +146,7 @@ Return list of all articles
 sub article_list {
     my ( $self ) = @_;
 
-    $self->_inject_article;
-    return $self->_sort($self->_cache->_article_list);
+    return $self->_sort($self->_get_or_create_cache);
 }
 
 =method article_details
@@ -115,7 +161,11 @@ Return information of article.
 sub article_details {
     my ( $self, $url ) = @_;
 
-    return $self->_cache->_article_details($url);
+    foreach my $article ( @{$self->_get_or_create_cache} ) {
+        return $article if $article->{link} eq $url;
+    }
+
+    return;
 }
 
 =method get_articles_by_tag
@@ -130,13 +180,26 @@ Return a list of articles filter by tag specified.
 sub get_articles_by_tag {
     my ( $self, $tag ) = @_;
 
-    return $self->_sort($self->_cache->_get_articles_by_tag($tag));
+    my @articles;
+
+    foreach my $article ( @{$self->_get_or_create_cache} ) {
+        push(@articles, $article) if grep(/$tag/, @{$article->{tags}});
+    }
+
+    return $self->_sort(\@articles);
 }
 
 sub search {
     my ( $self, $str ) = @_;
 
-    return $self->_sort($self->_cache->_search($str));
+    my @results;
+    foreach my $article ( @{$self->_get_or_create_cache} ) {
+        if ( $article->{title} =~ /$str/i || $article->{content} =~ /$str/i ) {
+            push(@results, $article);
+        }
+    }
+
+    return $self->_sort(\@results);
 }
 
 sub _sort {

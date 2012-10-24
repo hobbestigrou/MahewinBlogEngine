@@ -17,6 +17,34 @@ use POSIX qw(strftime);
 
 with 'MahewinBlogEngine::Role::File';
 
+has _last_file => (
+    is       => 'rw',
+    isa      => 'HashRef',
+    default  => sub { {} },
+    init_arg => undef,
+);
+
+before _get_or_create_cache => sub {
+    my ( $self ) = @_;
+
+    foreach my $file ( $self->directory->children ) {
+        if ( exists $self->_last_file->{$file} ) {
+            while ( my ( $key, $value ) = each %{$self->_last_file}) {
+                my ( $dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($file);
+                if ( $key eq $file ) {
+                    $mtime == $value
+                        and $self->_cache->remove('comments');
+                }
+            }
+        }
+        else {
+            $self->_cache->remove('comments');
+        }
+    }
+
+    return;
+};
+
 sub BUILD {
     my ( $self ) = @_;
 
@@ -24,9 +52,24 @@ sub BUILD {
     return;
 }
 
+sub _get_or_create_cache {
+    my ( $self ) = @_;
+
+    my $cache = $self->_cache->get('comments');
+
+    if ( !defined($cache) ) {
+        my @comments = $self->_inject_comment;
+        $self->_cache->set( 'comments', \@comments );
+        $cache = $self->_cache->get('comments')
+    }
+
+    return $cache;
+}
+
 sub _inject_comment {
     my ( $self ) = @_;
 
+    my @comments;
     $self->directory->recurse( callback => sub {
        my ( $file ) = @_;
 
@@ -42,10 +85,14 @@ sub _inject_comment {
                 \.([a-z]+)          # extension
             $/ix;
 
+            if ( ! exists $self->_last_file->{$file} ) {
+                my ( $dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($file);
+                $self->_last_file->{$file} = $mtime;
+            }
+
             my $time      = timelocal($6, $5, $4, $3, $2 - 1, $1);
             my $extension = lc($7);
-
-            my @lines    = $file->slurp(chomp => 0);
+            my @lines     = $file->slurp(chomp => 0);
 
             my $author = shift(@lines);
             my $mail   = shift(@lines);
@@ -66,7 +113,7 @@ sub _inject_comment {
 
             my $content  = $self->_renderer->renderer($body, $extension);
 
-            $self->_cache->_add_comment({
+            push(@comments, {
                 author      => $author,
                 mail        => $mail,
                 epoch       => $time,
@@ -78,20 +125,26 @@ sub _inject_comment {
             });
         }
     });
+
+    return @comments;
 }
 
 sub comment_list {
     my ( $self ) = @_;
 
-    $self->_inject_comment;
-    return $self->_cache->_comment_list;
+    return $self->_get_or_create_cache;
 }
 
 sub get_comments_by_article {
     my ( $self, $id_article ) = @_;
 
-    $self->_inject_comment;
-    return $self->_cache->_get_comments_by_article($id_article);
+    my @comments;
+
+    foreach my $comment ( @{$self->_get_or_create_cache} ) {
+        push(@comments, $comment) if $comment->{url_article} eq $id_article;
+    }
+
+    return \@comments;
 }
 
 sub add_comment {
