@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Moose;
+extends 'MahewinBlogEngine::Common';
 
 use POSIX;
 use Carp;
@@ -11,15 +12,6 @@ use File::Spec;
 
 use MahewinBlogEngine::Exceptions;
 use Time::Local qw(timelocal);
-
-with 'MahewinBlogEngine::Role::File';
-
-has _last_file => (
-    is       => 'rw',
-    isa      => 'HashRef',
-    default  => sub { {} },
-    init_arg => undef,
-);
 
 before _get_or_create_cache => sub {
     my ($self) = @_;
