@@ -6,7 +6,7 @@ use warnings;
 use Module::Load;
 
 require Exporter;
-our @ISA = qw(Exporter);
+our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(converted_text);
 
 sub converted_text {
@@ -20,7 +20,7 @@ sub converted_text {
     my $r = $dispatch->{$format} || '';
     my $class;
 
-    if ( $r ) {
+    if ($r) {
         $class = "MahewinBlogEngine::Renderer::$r";
         load $class;
     }
