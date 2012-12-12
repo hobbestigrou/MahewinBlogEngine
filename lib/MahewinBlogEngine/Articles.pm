@@ -25,8 +25,10 @@ before _get_or_create_cache => sub {
                     $ctime, $blksize, $blocks
                 ) = stat($file);
                 if ( $key eq $file ) {
-                    $mtime == $value
-                      and $self->_cache->remove('articles');
+                    if ( $mtime != $value ) {
+                        $self->_last_file->{$file} = $mtime;
+                        $self->_cache->remove('articles');
+                    }
                 }
             }
         }
