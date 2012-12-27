@@ -179,7 +179,7 @@ sub article_details {
     return;
 }
 
-=method get_articles_by_tag
+=method article_by_tag
 
 Return a list of articles filter by tag specified.
 
@@ -188,7 +188,7 @@ Return a list of articles filter by tag specified.
 
 =cut
 
-sub get_articles_by_tag {
+sub article_by_tag {
     my ( $self, $tag ) = @_;
 
     my @articles;
