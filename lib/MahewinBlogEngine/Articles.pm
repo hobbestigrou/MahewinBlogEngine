@@ -9,7 +9,6 @@ extends 'MahewinBlogEngine::Common';
 use MooseX::Params::Validate;
 
 use POSIX;
-use Carp;
 use File::Spec;
 
 use MahewinBlogEngine::Exceptions;
