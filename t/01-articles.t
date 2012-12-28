@@ -76,8 +76,11 @@ my $search = [{
 }];
 
 eq_or_diff $list, $articles->article_list, "Testing articles list";
-eq_or_diff $details, $articles->article_details('hello_world'), "Testing article details";
-eq_or_diff $tags, $articles->article_by_tag('test'), "Testing articles tags";
-eq_or_diff $search, $articles->search('world'), "Testing articles search";
+eq_or_diff $details, $articles->article_details(
+    link => 'hello_world' ), "Testing article details";
+eq_or_diff $tags, $articles->article_by_tag(
+    tag => 'test'), "Testing articles tags";
+eq_or_diff $search, $articles->search(
+    pattern => 'world' ), "Testing articles search";
 
 done_testing;
