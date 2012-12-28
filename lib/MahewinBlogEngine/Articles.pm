@@ -6,6 +6,8 @@ use warnings;
 use Moose;
 extends 'MahewinBlogEngine::Common';
 
+use MooseX::Params::Validate;
+
 use POSIX;
 use Carp;
 use File::Spec;
@@ -114,7 +116,10 @@ sub _inject_article {
             $body .= $line;
         }
 
-        my $content = $self->_renderer->renderer( $body, $extension );
+        my $content = $self->_renderer->renderer(
+            body   => $body,
+            format =>$extension
+        );
         my @tags = split( ',', $tags );
 
         push(
@@ -147,6 +152,8 @@ sub _validate_meta {
 
 =method articles_list
 
+  $articles->article_list
+
 Return list of all articles
 
   input: None
@@ -162,15 +169,20 @@ sub article_list {
 
 =method article_details
 
+  $articles->article_details( link => 'foo' );
+
 Return information of article.
 
-  input: Str: key: key of article
+  input: link (Int) : required, link of article
   output: Hashref: Details of article
 
 =cut
 
 sub article_details {
-    my ( $self, $url ) = @_;
+    my ( $self, $url ) = validated_list(
+        \@_,
+        link => { isa => 'Str' }
+    );
 
     foreach my $article ( @{ $self->_get_or_create_cache } ) {
         return $article if $article->{link} eq $url;
@@ -181,15 +193,20 @@ sub article_details {
 
 =method article_by_tag
 
+    $articles->article_by_tag( tag => 'world' );
+
 Return a list of articles filter by tag specified.
 
-    input: Str: tag of filter
+    input: tag (Str) : tag of filter
     output: ArrayRef[HashRef]: A list of article mathches by tag
 
 =cut
 
 sub article_by_tag {
-    my ( $self, $tag ) = @_;
+    my ( $self, $tag ) = validated_list(
+        \@_,
+        tag => { isa => 'Str' }
+    );
 
     my @articles;
 
@@ -201,7 +218,10 @@ sub article_by_tag {
 }
 
 sub search {
-    my ( $self, $str ) = @_;
+    my ( $self, $str ) = validated_list(
+        \@_,
+        pattern => { isa => 'Str' }
+    );
 
     my @results;
     foreach my $article ( @{ $self->_get_or_create_cache } ) {

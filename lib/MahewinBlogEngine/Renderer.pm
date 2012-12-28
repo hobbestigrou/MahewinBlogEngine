@@ -1,7 +1,7 @@
 package MahewinBlogEngine::Renderer;
 
 use Moose;
-use Carp;
+use MooseX::Params::Validate;
 
 use aliased 'MahewinBlogEngine::Renderer::Markdown';
 use aliased 'MahewinBlogEngine::Renderer::HTML';
@@ -32,7 +32,11 @@ sub _build_renderer_avalaible {
 };
 
 sub renderer {
-    my ( $self, $text, $format ) = @_;
+    my ( $self, $text, $format ) = validated_list(
+        \@_,
+        body   => { isa => 'Str' },
+        format => { isa => 'Str' }
+    );
 
 
     if ( my $rend = $self->_renderer_avalaible->{$format} ) {

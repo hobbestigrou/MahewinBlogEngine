@@ -6,6 +6,8 @@ use warnings;
 use Moose;
 extends 'MahewinBlogEngine::Common';
 
+use MooseX::Params::Validate;
+
 use Carp;
 use File::Spec;
 
@@ -114,7 +116,10 @@ sub _inject_comment {
 
                 $body //= '';
 
-                my $content = $self->_renderer->renderer( $body, $extension );
+                my $content = $self->_renderer->renderer(
+                    body   => $body,
+                    format => $extension
+                );
 
                 push(
                     @comments,
@@ -143,7 +148,10 @@ sub comment_list {
 }
 
 sub get_comments_by_article {
-    my ( $self, $id_article ) = @_;
+    my ( $self, $id_article ) = validated_list(
+        \@_,
+        id_article => { isa => 'Str' }
+    );
 
     my @comments;
 
@@ -155,7 +163,11 @@ sub get_comments_by_article {
 }
 
 sub add_comment {
-    my ( $self, $id_article, $params ) = @_;
+    my ( $self, $id_article, $params ) = validated_list(
+        \@_,
+        id_article => { isa => 'Str' },
+        params     => { isa => 'HashRef' }
+    );
 
     my $now = strftime "%Y-%m-%d-%H-%M-%S", localtime;
 
@@ -165,8 +177,8 @@ sub add_comment {
 
     mkdir($directory) unless -e $directory;
 
-    my $name = $params->{name} // 'Anonymous';
-    my $mail = $params->{mail} // '';
+    my $name   = $params->{name} // 'Anonymous';
+    my $mail   = $params->{mail} // '';
     my $body   = $params->{body} =~ s/\cM//g // '';
     my $url    = $params->{url}              // '';
     my $hidden = int( $params->{hidden} )    // 1;
