@@ -74,6 +74,8 @@ sub _inject_comment {
 
             if ( -f $file ) {
                 my $relative_path = File::Spec->abs2rel( $file, $file->parent );
+                $relative_path =~ /^\./
+                    and next;
                 filename_not_parseable error => 'Filename not parseable: '
                   . "$relative_path "
                   unless $relative_path =~ /^
