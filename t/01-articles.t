@@ -10,7 +10,30 @@ use Cwd;
 use MahewinBlogEngine;
 
 my $articles = MahewinBlogEngine->articles( directory => getcwd() . '/t/articles' );
-my $list     = [{
+my $list     = [{content => '<p>To test footnote feature with multimarkdown.<a href="#fn:1" id="fnref:1" class="footnote">1</a></p>
+
+<div class="footnotes">
+<hr />
+<ol>
+
+<li id="fn:1"><p>This is the footnote.<a href="#fnref:1" class="reversefootnote">&#160;&#8617;</a></p></li>
+
+</ol>
+</div>
+',
+  date => '28/12/2012 19:15:00',
+  epoch => 1356722100,
+  link => 'test_footnotes',
+  tags => [
+    'footnote',
+    ' multimarkdown
+'
+  ],
+  title => 'Test footnotes
+'
+},
+
+    {
   content => '<p>Just a another test article.</p>
 ',
   date => '27/12/2012 17:15:00',
