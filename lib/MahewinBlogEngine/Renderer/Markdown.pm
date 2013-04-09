@@ -2,7 +2,7 @@ package MahewinBlogEngine::Renderer::Markdown;
 
 use Moose;
 
-use Text::Markdown;
+use Text::MultiMarkdown;
 
 has '_markdown' => (
     is      => 'ro',
@@ -11,7 +11,7 @@ has '_markdown' => (
 );
 
 sub _build_markdown {
-    Text::Markdown->new;
+    Text::MultiMarkdown->new;
 }
 
 sub renderer {
