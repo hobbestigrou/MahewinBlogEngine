@@ -1,0 +1,6 @@
+Title: Test pod format
+Tags: pod, format
+
+=head1 Introduction
+
+Just a file to test pod format.
