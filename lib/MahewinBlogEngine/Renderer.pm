@@ -5,6 +5,7 @@ use MooseX::Params::Validate;
 
 use aliased 'MahewinBlogEngine::Renderer::Markdown';
 use aliased 'MahewinBlogEngine::Renderer::HTML';
+use aliased 'MahewinBlogEngine::Renderer::POD';
 use MahewinBlogEngine::Exceptions;
 use Data::Dumper;
 
@@ -26,6 +27,10 @@ sub _build_renderer_avalaible {
             my $renderer = HTML->new();
             $renderer->renderer(shift);
         },
+        pod => sub {
+            my $renderer = POD->new();
+            $renderer->renderer(shift);
+        },
     };
 
     return $rend;
@@ -40,6 +45,7 @@ sub renderer {
 
 
     if ( my $rend = $self->_renderer_avalaible->{$format} ) {
+        $text =~ s/^\s*(\S*(?:\s+\S+)*)\s*$/$1/;
         return $rend->($text);
     }
     else {
