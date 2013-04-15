@@ -3,11 +3,9 @@ package MahewinBlogEngine::Renderer;
 use Moose;
 use MooseX::Params::Validate;
 
-use aliased 'MahewinBlogEngine::Renderer::Markdown';
-use aliased 'MahewinBlogEngine::Renderer::HTML';
-use aliased 'MahewinBlogEngine::Renderer::POD';
+use Module::Load;
+
 use MahewinBlogEngine::Exceptions;
-use Data::Dumper;
 
 has _renderer_avalaible => (
     is       => 'ro',
@@ -20,15 +18,21 @@ has _renderer_avalaible => (
 sub _build_renderer_avalaible {
     my $rend = {
         md   => sub {
-            my $renderer = Markdown->new;
+            load MahewinBlogEngine::Renderer::Markdown;
+
+            my $renderer = MahewinBlogEngine::Renderer::Markdown->new;
             $renderer->renderer(shift);
         },
         html => sub {
-            my $renderer = HTML->new();
+            load MahewinBlogEngine::Renderer::HTML;
+
+            my $renderer = MahewinBlogEngine::Renderer::HTML->new();
             $renderer->renderer(shift);
         },
         pod => sub {
-            my $renderer = POD->new();
+            load MahewinBlogEngine::Renderer::POD;
+
+            my $renderer = MahewinBlogEngine::Renderer::POD->new();
             $renderer->renderer(shift);
         },
     };
