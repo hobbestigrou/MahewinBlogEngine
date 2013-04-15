@@ -4,7 +4,6 @@ use Moose;
 
 use Pod::POM;
 use MahewinBlogEngine::Renderer::POD::View;
-use Data::Dumper;
 
 has '_pom' => (
     is       => 'ro',
