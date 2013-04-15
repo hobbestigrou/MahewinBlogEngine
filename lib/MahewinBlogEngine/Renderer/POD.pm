@@ -20,12 +20,7 @@ sub _build_pom {
 sub renderer {
     my ( $self, $text ) = @_;
 
-    print 'Salut';
-    print $text;
-
-#    $text = '=head1 Essai';
     my $pom = $self->_pom->parse_text($text);
-
     return MahewinBlogEngine::Renderer::POD::View->print($pom);
 }
 
