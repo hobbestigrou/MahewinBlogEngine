@@ -13,6 +13,21 @@ my $articles = MahewinBlogEngine->articles( directory => getcwd() . '/t/articles
 my $list     = [{
         content => '<h1>Introduction</h1>
 
+<p>Just a file to test the textile format.</p>',
+        link  => 'test_textile_format',
+        epoch => 1356897600,
+        date  => '30/12/2012 20:00:00',
+        title => 'Test textile format
+',
+        tags => [
+            'format',
+            ' textile
+'
+        ]
+    },
+    {
+        content => '<h1>Introduction</h1>
+
 <p>Just a file to test pod format.</p>
 ',
 
