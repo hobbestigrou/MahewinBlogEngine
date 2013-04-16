@@ -35,6 +35,12 @@ sub _build_renderer_avalaible {
             my $renderer = MahewinBlogEngine::Renderer::POD->new();
             $renderer->renderer(shift);
         },
+        textile => sub {
+            load MahewinBlogEngine::Renderer::Textile;
+
+            my $renderer = MahewinBlogEngine::Renderer::Textile->new();
+            $renderer->renderer(shift);
+        },
     };
 
     return $rend;
