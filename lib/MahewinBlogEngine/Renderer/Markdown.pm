@@ -5,9 +5,10 @@ use Moose;
 use Text::MultiMarkdown;
 
 has '_markdown' => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_markdown'
+    is       => 'ro',
+    lazy     => 1,
+    builder  => '_build_markdown',
+    init_arg => undef
 );
 
 sub _build_markdown {
