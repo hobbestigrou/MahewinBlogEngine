@@ -52,10 +52,11 @@ has _last_file => (
 );
 
 has _renderer => (
-    is      => 'ro',
-    isa     => 'MahewinBlogEngine::Renderer',
-    lazy    => 1,
-    builder => '_build_renderer',
+    is       => 'ro',
+    isa      => 'MahewinBlogEngine::Renderer',
+    lazy     => 1,
+    builder  => '_build_renderer',
+    init_arg => undef,
 );
 
 
