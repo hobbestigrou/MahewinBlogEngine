@@ -4,7 +4,7 @@ use Moose;
 use MooseX::Types::Path::Class qw(Dir File);
 
 use CHI;
-use MahewinBlogEngine::Renderer
+use MahewinBlogEngine::Renderer;
 
 =attr directory
 
