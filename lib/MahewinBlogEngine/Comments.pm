@@ -9,7 +9,6 @@ extends 'MahewinBlogEngine::Common';
 use MooseX::Params::Validate;
 
 use Carp;
-use File::Spec;
 
 use Time::Local qw(timelocal);
 
@@ -18,20 +17,22 @@ use MahewinBlogEngine::Renderer;
 
 use POSIX qw(strftime);
 
+use Data::Dumper;
+
 before _get_or_create_cache => sub {
     my ($self) = @_;
 
-    foreach my $file ( $self->directory->children ) {
+    my $file;
+    my $iter = $self->directory->iterator({ recurse => 1 });
+    while ( $file = $iter->() ) {
         if ( exists $self->_last_file->{$file} ) {
             while ( my ( $key, $value ) = each %{ $self->_last_file } ) {
-                my (
-                    $dev,   $ino,     $mode, $nlink, $uid,
-                    $gid,   $rdev,    $size, $atime, $mtime,
-                    $ctime, $blksize, $blocks
-                ) = stat($file);
+                my $stat = $file->stat;
                 if ( $key eq $file ) {
-                    $mtime == $value
-                      and $self->_cache->remove('comments');
+                    if ( $stat->[9] != $value ) {
+                        $self->_last_file->{$file} = $stat->[9];
+                        $self->_cache->remove('comments');
+                    }
                 }
             }
         }
@@ -68,77 +69,68 @@ sub _inject_comment {
     my ($self) = @_;
 
     my @comments;
-    $self->directory->recurse(
-        callback => sub {
-            my ($file) = @_;
-
-            if ( -f $file ) {
-                my $relative_path = File::Spec->abs2rel( $file, $file->parent );
-                $relative_path =~ /^\./
-                    and next;
-                filename_not_parseable error => 'Filename not parseable: '
-                  . "$relative_path "
-                  unless $relative_path =~ /^
-                (\d\d\d\d)          # year
-                -(\d\d)             # month
-                -(\d\d)             # day
-                -(\d\d)             # hour
-                -(\d\d)             # minute
-                -(\d\d)             # second
-                \.([a-z]+)          # extension
+    my $file;
+    my $iter = $self->directory->iterator({ recurse => 1 });
+    while ( $file = $iter->() ) {
+        if ( $file->is_file ) {
+            filename_not_parseable error => 'Filename not parseable: '
+                . "$file->basename "
+                unless $file->basename =~ /^
+            (\d\d\d\d)          # year
+            -(\d\d)             # month
+            -(\d\d)             # day
+            -(\d\d)             # hour
+            -(\d\d)             # minute
+            -(\d\d)             # second
+            \.([a-z]+)          # extension
             $/ix;
 
-                if ( !exists $self->_last_file->{$file} ) {
-                    my (
-                        $dev,   $ino,     $mode, $nlink, $uid,
-                        $gid,   $rdev,    $size, $atime, $mtime,
-                        $ctime, $blksize, $blocks
-                    ) = stat($file);
-                    $self->_last_file->{$file} = $mtime;
-                }
-
-                my $time      = timelocal( $6, $5, $4, $3, $2 - 1, $1 );
-                my $extension = lc($7);
-                my @lines     = $file->slurp( chomp => 0 );
-
-                my $author = shift(@lines);
-                my $mail   = shift(@lines);
-                my $url    = shift(@lines);
-                my $hidden = shift(@lines);
-
-                $author =~ s/Name:\s//;
-                $mail   =~ s/Mail:\s//;
-                $url    =~ s/Url:\s//;
-                $hidden =~ s/Hidden:\s//;
-
-                my $body;
-                foreach my $line (@lines) {
-                    $body .= $line;
-                }
-
-                $body //= '';
-
-                my $content = $self->_renderer->renderer(
-                    body   => $body,
-                    format => $extension
-                );
-
-                push(
-                    @comments,
-                    {
-                        author      => $author,
-                        mail        => $mail,
-                        epoch       => $time,
-                        key         => $author . '_' . $time,
-                        url         => $url,
-                        hidden      => int($hidden) // 0,
-                        url_article => $file->dir->{dirs}->[-1],
-                        body        => $content,
-                    }
-                );
-            }
+        if ( !exists $self->_last_file->{$file} ) {
+            my $stat = $file->stat;
+            $self->_last_file->{$file} = $stat->[9];
         }
-    );
+
+        my $time      = timelocal( $6, $5, $4, $3, $2 - 1, $1 );
+        my $extension = lc($7);
+        my @lines     = $file->lines_utf8({chomp  => 0});
+
+        my $author = shift(@lines);
+        my $mail   = shift(@lines);
+        my $url    = shift(@lines);
+        my $hidden = shift(@lines);
+
+        $author =~ s/Name:\s//;
+        $mail   =~ s/Mail:\s//;
+        $url    =~ s/Url:\s//;
+        $hidden =~ s/Hidden:\s//;
+
+        my $body;
+        foreach my $line (@lines) {
+            $body .= $line;
+        }
+
+        $body //= '';
+
+        my $content = $self->_renderer->renderer(
+            body   => $body,
+            format => $extension
+        );
+
+        push(
+            @comments,
+            {
+                author      => $author,
+                mail        => $mail,
+                epoch       => $time,
+                key         => $author . '_' . $time,
+                url         => $url,
+                hidden      => int($hidden) // 0,
+                url_article => $file->parent->basename,
+                body        => $content,
+            }
+        );
+    }
+}
 
     return @comments;
 }

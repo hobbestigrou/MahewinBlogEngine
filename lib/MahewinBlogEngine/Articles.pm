@@ -9,7 +9,6 @@ extends 'MahewinBlogEngine::Common';
 use MooseX::Params::Validate;
 
 use POSIX;
-use File::Spec;
 
 use MahewinBlogEngine::Exceptions;
 use Time::Local qw(timelocal);
@@ -20,14 +19,10 @@ before _get_or_create_cache => sub {
     foreach my $file ( $self->directory->children ) {
         if ( exists $self->_last_file->{$file} ) {
             while ( my ( $key, $value ) = each %{ $self->_last_file } ) {
-                my (
-                    $dev,   $ino,     $mode, $nlink, $uid,
-                    $gid,   $rdev,    $size, $atime, $mtime,
-                    $ctime, $blksize, $blocks
-                ) = stat($file);
+                my $stat = $file->stat;
                 if ( $key eq $file ) {
-                    if ( $mtime != $value ) {
-                        $self->_last_file->{$file} = $mtime;
+                    if ( $stat->[9] != $value ) {
+                        $self->_last_file->{$file} = $stat->[9];
                         $self->_cache->remove('articles');
                     }
                 }
@@ -65,17 +60,13 @@ sub _get_or_create_cache {
 sub _inject_article {
     my ($self) = @_;
 
-    my @files = $self->directory->children;
-    my @files_tri = sort { $b cmp $a } @files;
+    my @files = sort { $b cmp $a } $self->directory->children;
     my @articles;
 
-    foreach my $file (@files_tri) {
-        my $relative_path = File::Spec->abs2rel( $file, $file->parent );
-        $relative_path =~ /^\./
-            and next;
+    foreach my $file (@files) {
         filename_not_parseable error => 'Filename not parseable: '
-          . "$relative_path "
-          unless $relative_path =~ /^
+          . "$file->basename "
+          unless $file->basename =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
             -(\d\d)             # day
@@ -86,12 +77,8 @@ sub _inject_article {
         $/ix;
 
         if ( !exists $self->_last_file->{$file} ) {
-            my (
-                $dev,   $ino,     $mode, $nlink, $uid,
-                $gid,   $rdev,    $size, $atime, $mtime,
-                $ctime, $blksize, $blocks
-            ) = stat($file);
-            $self->_last_file->{$file} = $mtime;
+            my $stat = $file->stat;
+            $self->_last_file->{$file} = $stat->[9];
         }
 
         #Build date, url part and extension
@@ -99,9 +86,8 @@ sub _inject_article {
         my $url       = lc($7);
         my $extension = lc($8);
 
-        my $encoding = $self->encoding;
         my @lines =
-          $file->slurp( chomp => 0, iomode => "<:encoding($encoding)" );
+          $file->lines_utf8({chomp  => 0});
         _validate_meta(@lines);
 
         my $title = shift(@lines);

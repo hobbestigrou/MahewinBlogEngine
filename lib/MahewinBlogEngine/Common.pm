@@ -1,7 +1,7 @@
 package MahewinBlogEngine::Common;
 
 use Moose;
-use MooseX::Types::Path::Class qw(Dir File);
+use Types::Path::Tiny qw/Path AbsPath/;
 
 use CHI;
 use MahewinBlogEngine::Renderer;
@@ -14,7 +14,7 @@ rw, required, Str. The directory contain articles.
 
 has 'directory' => (
     is       => 'rw',
-    isa      => Dir,
+    isa      => AbsPath,
     required => 1,
     coerce   => 1,
 );
