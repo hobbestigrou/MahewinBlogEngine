@@ -51,7 +51,7 @@ before _get_or_create_cache => sub {
 sub BUILD {
     my ($self) = @_;
 
-    $self->_inject_comment;
+    $self->_get_or_create_cache;
     return;
 }
 
@@ -59,7 +59,6 @@ sub _get_or_create_cache {
     my ($self) = @_;
 
     my $cache = $self->_cache->get('comments');
-
     if ( !defined($cache) ) {
         my @comments = $self->_inject_comment;
         $self->_cache->set( 'comments', \@comments );
