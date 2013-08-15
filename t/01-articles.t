@@ -9,7 +9,9 @@ use Test::Differences::Color;
 use Cwd;
 use MahewinBlogEngine;
 
-my $articles = MahewinBlogEngine->articles( directory => getcwd() . '/t/articles' );
+my $articles = MahewinBlogEngine->articles(
+    directory => getcwd() . '/t/articles'
+);
 my $list     = [{
         content => '<h1>Introduction</h1>
 

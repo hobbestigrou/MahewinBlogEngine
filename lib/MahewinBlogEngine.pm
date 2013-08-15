@@ -7,6 +7,7 @@ use Moo;
 
 use MahewinBlogEngine::Articles;
 use MahewinBlogEngine::Comments;
+use MahewinBlogEngine::Pages;
 
 #ABSTRACT: A simple blog engine
 
@@ -22,6 +23,13 @@ sub comments {
 
     my $comments = MahewinBlogEngine::Comments->new(%args);
     return $comments;
+}
+
+sub pages {
+    my ( $self, %args ) = @_;
+
+    my $pages = MahewinBlogEngine::Pages->new(%args);
+    return $pages;
 }
 
 1;

@@ -19,48 +19,11 @@ use Types::Standard qw( slurpy Dict Str );
 
 my $invocant = class_type { class => __PACKAGE__ };
 
-before _get_or_create_cache => sub {
-    my ($self) = @_;
-
-    foreach my $file ( $self->directory->children ) {
-        if ( exists $self->_last_file->{$file} ) {
-            while ( my ( $key, $value ) = each %{ $self->_last_file } ) {
-                my $stat = $file->stat;
-                if ( $key eq $file ) {
-                    if ( $stat->[9] != $value ) {
-                        $self->_last_file->{$file} = $stat->[9];
-                        $self->_cache->remove('articles');
-                    }
-                }
-            }
-        }
-        else {
-            $self->_cache->remove('articles');
-        }
-    }
-
-    return;
-};
-
 sub BUILD {
     my ($self) = @_;
 
-    $self->_get_or_create_cache;
+    $self->_get_or_create_cache('articles');
     return;
-}
-
-sub _get_or_create_cache {
-    my ($self) = @_;
-
-    my $cache = $self->_cache->get('articles');
-
-    if ( !defined($cache) ) {
-        my @articles = $self->_inject_article;
-        $self->_cache->set( 'articles', \@articles );
-        $cache = $self->_cache->get('articles');
-    }
-
-    return $cache;
 }
 
 sub _inject_article {
@@ -94,7 +57,7 @@ sub _inject_article {
 
         my @lines =
         $file->lines_utf8({chomp  => 0});
-        _validate_meta(@lines);
+        $self->_validate_meta(@lines);
 
         my $title = shift(@lines);
         my $tags  = shift(@lines);
@@ -129,18 +92,6 @@ sub _inject_article {
     return @articles;
 }
 
-sub _validate_meta {
-    my (@file_content) = @_;
-
-    if (   $file_content[0] !~ m/^Title:\s+\w+/
-        || $file_content[1] !~ m/^Tags:(?:\s\w+)/ )
-    {
-        meta_not_valid error => 'Meta not valid';
-    }
-
-    return;
-}
-
 =method articles_list
 
   $articles->article_list
@@ -155,7 +106,7 @@ Return list of all articles
 sub article_list {
     my ($self) = @_;
 
-    return $self->_sort( $self->_get_or_create_cache );
+    return $self->_sort( $self->_get_or_create_cache('articles') );
 }
 
 =method article_details
@@ -179,11 +130,10 @@ sub article_details {
     my ($self, $arg) = $check->(@_);
     my $url = $arg->{link};
 
-    foreach my $article ( @{ $self->_get_or_create_cache } ) {
-        return $article if $article->{link} eq $url;
-    }
-
-    return;
+    return $self->SUPER::details(
+        link => $url,
+        type => 'articles'
+    );
 }
 
 =method article_by_tag
@@ -207,13 +157,12 @@ sub article_by_tag {
     my ($self, $arg) = $check->(@_);
     my $tag = $arg->{tag};
 
-    my @articles;
-
-    foreach my $article ( @{ $self->_get_or_create_cache } ) {
-        push( @articles, $article ) if grep( /$tag/, @{ $article->{tags} } );
-    }
-
-    return $self->_sort( \@articles );
+    return $self->_sort(
+        $self->SUPER::by_tag(
+            tag  => $tag,
+            type => 'articles',
+        )
+    );
 }
 
 sub search {
@@ -226,18 +175,17 @@ sub search {
     my ($self, $arg) = $check->(@_);
     my $str = $arg->{pattern};
 
-    my @results;
-    foreach my $article ( @{ $self->_get_or_create_cache } ) {
-        if ( $article->{title} =~ /$str/i || $article->{content} =~ /$str/i ) {
-            push( @results, $article );
-        }
-    }
-
-    return $self->_sort( \@results );
+    return $self->_sort(
+        $self->SUPER::search(
+            pattern => $str,
+            type    => 'articles',
+        )
+    );
 }
 
 sub _sort {
     my ( $self, $articles ) = @_;
+
 
     my @sort = sort { $b->{epoch} <=> $a->{epoch} } @{$articles};
     return \@sort;
