@@ -1,17 +1,15 @@
 package MahewinBlogEngine::Renderer::Textile;
 
-use Moose;
+use Moo;
 
 use Text::Textile;
 
 has '_textile' => (
-    is       => 'ro',
-    lazy     => 1,
-    builder  => '_build_textile',
+    is       => 'lazy',
     init_arg => undef
 );
 
-sub _build_textile {
+sub _build__textile {
     Text::Textile->new;
 }
 

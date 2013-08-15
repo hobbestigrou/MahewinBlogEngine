@@ -1,10 +1,17 @@
 package MahewinBlogEngine::Common;
 
-use Moose;
+use feature "state";
+
+use Moo;
 use Types::Path::Tiny qw/Path AbsPath/;
+use Path::Tiny qw( path );
 
 use CHI;
 use MahewinBlogEngine::Renderer;
+
+use Type::Params qw( compile );
+use Types::Standard qw( slurpy Object Str HashRef ArrayRef );
+
 
 =attr directory
 
@@ -16,7 +23,11 @@ has 'directory' => (
     is       => 'rw',
     isa      => AbsPath,
     required => 1,
-    coerce   => 1,
+    coerce   => sub {
+        my ( $dir ) = @_;
+
+        return path($dir);
+    }
 );
 
 =attr encoding
@@ -27,7 +38,7 @@ rw, Str. Indicate the encoding file. Default is utf8.
 
 has 'encoding' => (
     is      => 'rw',
-    isa     => 'Str',
+    isa     => Str,
     default => 'utf8'
 );
 
@@ -40,38 +51,34 @@ Default value is %x %T.
 
 has 'date_format' => (
     is      => 'ro',
-    isa     => 'Str',
+    isa     => Str,
     default => "%x %T"
 );
 
 has _last_file => (
     is       => 'rw',
-    isa      => 'HashRef',
+    isa      => HashRef,
     default  => sub { {} },
     init_arg => undef,
 );
 
 has _renderer => (
-    is       => 'ro',
-    isa      => 'MahewinBlogEngine::Renderer',
-    lazy     => 1,
-    builder  => '_build_renderer',
+    is       => 'lazy',
+    isa      => Object,
     init_arg => undef,
 );
 
 
 has _cache => (
-    is      => 'ro',
-    isa     => 'CHI::Driver',
-    lazy    => 1,
-    builder => '_build_cache',
+    is      => 'lazy',
+    isa     => Object,
 );
 
-sub _build_renderer {
+sub _build__renderer {
     return MahewinBlogEngine::Renderer->new();
 }
 
-sub _build_cache {
+sub _build__cache {
     return CHI->new( driver => 'Memory', global => 1 );
 }
 

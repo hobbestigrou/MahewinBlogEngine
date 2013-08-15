@@ -3,7 +3,7 @@ package MahewinBlogEngine::Renderer::HTML;
 use strict;
 use warnings;
 
-use Moose;
+use Moo;
 
 sub renderer {
     my ( $self, $text ) = @_;

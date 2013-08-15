@@ -1,18 +1,16 @@
 package MahewinBlogEngine::Renderer::POD;
 
-use Moose;
+use Moo;
 
 use Pod::POM;
 use MahewinBlogEngine::Renderer::POD::View;
 
 has '_pom' => (
-    is       => 'ro',
-    lazy     => 1,
-    builder  => '_build_pom',
+    is       => 'lazy',
     init_arg => undef
 );
 
-sub _build_pom {
+sub _build__pom {
     Pod::POM->new( warning => 1 );
 }
 

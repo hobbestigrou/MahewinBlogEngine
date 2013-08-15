@@ -1,12 +1,11 @@
 package MahewinBlogEngine::Exceptions;
 
-use Moose ();
-use Moose::Exporter;
+use strict;
+use warnings;
 
-Moose::Exporter->setup_import_methods(
-    as_is     => ['throw_format_not_supported', 'filename_not_parseable', 'meta_not_valid'],
-    also      => 'Moose',
-);
+use base 'Exporter';
+
+our @EXPORT = qw(throw_format_not_supported filename_not_parseable meta_not_valid);
 
 use Exception::Class (
     'MahewinBlogEngine::Exception::FormatNotSupported' => {

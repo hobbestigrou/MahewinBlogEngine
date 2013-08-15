@@ -3,7 +3,7 @@ package MahewinBlogEngine;
 use strict;
 use warnings;
 
-use Moose;
+use Moo;
 
 use MahewinBlogEngine::Articles;
 use MahewinBlogEngine::Comments;

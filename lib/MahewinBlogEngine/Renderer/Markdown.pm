@@ -1,17 +1,15 @@
 package MahewinBlogEngine::Renderer::Markdown;
 
-use Moose;
+use Moo;
 
 use Text::MultiMarkdown;
 
 has '_markdown' => (
-    is       => 'ro',
-    lazy     => 1,
-    builder  => '_build_markdown',
+    is       => 'lazy',
     init_arg => undef
 );
 
-sub _build_markdown {
+sub _build__markdown {
     Text::MultiMarkdown->new;
 }
 

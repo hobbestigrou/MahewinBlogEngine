@@ -3,15 +3,21 @@ package MahewinBlogEngine::Articles;
 use strict;
 use warnings;
 
-use Moose;
-extends 'MahewinBlogEngine::Common';
+use feature qw( state );
 
-use MooseX::Params::Validate;
+use Moo;
+extends 'MahewinBlogEngine::Common';
 
 use POSIX;
 
 use MahewinBlogEngine::Exceptions;
 use Time::Local qw(timelocal);
+
+use Type::Params qw( compile );
+use Type::Utils;
+use Types::Standard qw( slurpy Dict Str );
+
+my $invocant = class_type { class => __PACKAGE__ };
 
 before _get_or_create_cache => sub {
     my ($self) = @_;
@@ -65,15 +71,15 @@ sub _inject_article {
 
     foreach my $file (@files) {
         filename_not_parseable error => 'Filename not parseable: '
-          . "$file->basename "
-          unless $file->basename =~ /^
-            (\d\d\d\d)          # year
-            -(\d\d)             # month
-            -(\d\d)             # day
-            (?:-(\d\d)-(\d\d))? # optional: hour and minute
-            (?:-(\d\d))?        # optional: second
-            _(.*)               # url part
-            \.([a-z]+)          # extension
+        . "$file->basename "
+        unless $file->basename =~ /^
+        (\d\d\d\d)          # year
+        -(\d\d)             # month
+        -(\d\d)             # day
+        (?:-(\d\d)-(\d\d))? # optional: hour and minute
+        (?:-(\d\d))?        # optional: second
+        _(.*)               # url part
+        \.([a-z]+)          # extension
         $/ix;
 
         if ( !exists $self->_last_file->{$file} ) {
@@ -87,7 +93,7 @@ sub _inject_article {
         my $extension = lc($8);
 
         my @lines =
-          $file->lines_utf8({chomp  => 0});
+        $file->lines_utf8({chomp  => 0});
         _validate_meta(@lines);
 
         my $title = shift(@lines);
@@ -103,7 +109,7 @@ sub _inject_article {
 
         my $content = $self->_renderer->renderer(
             body   => $body,
-            format =>$extension
+            format => $extension
         );
         my @tags = split( ',', $tags );
 
@@ -164,10 +170,14 @@ Return information of article.
 =cut
 
 sub article_details {
-    my ( $self, $url ) = validated_list(
-        \@_,
-        link => { isa => 'Str' }
+    state $check = compile(
+        $invocant,
+        slurpy Dict[
+            link => Str,
+        ]
     );
+    my ($self, $arg) = $check->(@_);
+    my $url = $arg->{link};
 
     foreach my $article ( @{ $self->_get_or_create_cache } ) {
         return $article if $article->{link} eq $url;
@@ -188,10 +198,14 @@ Return a list of articles filter by tag specified.
 =cut
 
 sub article_by_tag {
-    my ( $self, $tag ) = validated_list(
-        \@_,
-        tag => { isa => 'Str' }
+    state $check = compile(
+        $invocant,
+        slurpy Dict[
+            tag => Str,
+        ]
     );
+    my ($self, $arg) = $check->(@_);
+    my $tag = $arg->{tag};
 
     my @articles;
 
@@ -203,10 +217,14 @@ sub article_by_tag {
 }
 
 sub search {
-    my ( $self, $str ) = validated_list(
-        \@_,
-        pattern => { isa => 'Str' }
+    state $check = compile(
+        $invocant,
+        slurpy Dict[
+            pattern => Str,
+        ]
     );
+    my ($self, $arg) = $check->(@_);
+    my $str = $arg->{pattern};
 
     my @results;
     foreach my $article ( @{ $self->_get_or_create_cache } ) {

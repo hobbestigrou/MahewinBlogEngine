@@ -3,10 +3,10 @@ package MahewinBlogEngine::Comments;
 use strict;
 use warnings;
 
-use Moose;
-extends 'MahewinBlogEngine::Common';
+use feature qw( state );
 
-use MooseX::Params::Validate;
+use Moo;
+extends 'MahewinBlogEngine::Common';
 
 use Carp;
 
@@ -17,7 +17,11 @@ use MahewinBlogEngine::Renderer;
 
 use POSIX qw(strftime);
 
-use Data::Dumper;
+use Type::Params qw( compile );
+use Type::Utils;
+use Types::Standard qw( slurpy Dict Str HashRef );
+
+my $invocant = class_type { class => __PACKAGE__ };
 
 before _get_or_create_cache => sub {
     my ($self) = @_;
@@ -74,8 +78,8 @@ sub _inject_comment {
     while ( $file = $iter->() ) {
         if ( $file->is_file ) {
             filename_not_parseable error => 'Filename not parseable: '
-                . "$file->basename "
-                unless $file->basename =~ /^
+            . "$file->basename "
+            unless $file->basename =~ /^
             (\d\d\d\d)          # year
             -(\d\d)             # month
             -(\d\d)             # day
@@ -85,52 +89,52 @@ sub _inject_comment {
             \.([a-z]+)          # extension
             $/ix;
 
-        if ( !exists $self->_last_file->{$file} ) {
-            my $stat = $file->stat;
-            $self->_last_file->{$file} = $stat->[9];
-        }
-
-        my $time      = timelocal( $6, $5, $4, $3, $2 - 1, $1 );
-        my $extension = lc($7);
-        my @lines     = $file->lines_utf8({chomp  => 0});
-
-        my $author = shift(@lines);
-        my $mail   = shift(@lines);
-        my $url    = shift(@lines);
-        my $hidden = shift(@lines);
-
-        $author =~ s/Name:\s//;
-        $mail   =~ s/Mail:\s//;
-        $url    =~ s/Url:\s//;
-        $hidden =~ s/Hidden:\s//;
-
-        my $body;
-        foreach my $line (@lines) {
-            $body .= $line;
-        }
-
-        $body //= '';
-
-        my $content = $self->_renderer->renderer(
-            body   => $body,
-            format => $extension
-        );
-
-        push(
-            @comments,
-            {
-                author      => $author,
-                mail        => $mail,
-                epoch       => $time,
-                key         => $author . '_' . $time,
-                url         => $url,
-                hidden      => int($hidden) // 0,
-                url_article => $file->parent->basename,
-                body        => $content,
+            if ( !exists $self->_last_file->{$file} ) {
+                my $stat = $file->stat;
+                $self->_last_file->{$file} = $stat->[9];
             }
-        );
+
+            my $time      = timelocal( $6, $5, $4, $3, $2 - 1, $1 );
+            my $extension = lc($7);
+            my @lines     = $file->lines_utf8({chomp  => 0});
+
+            my $author = shift(@lines);
+            my $mail   = shift(@lines);
+            my $url    = shift(@lines);
+            my $hidden = shift(@lines);
+
+            $author =~ s/Name:\s//;
+            $mail   =~ s/Mail:\s//;
+            $url    =~ s/Url:\s//;
+            $hidden =~ s/Hidden:\s//;
+
+            my $body;
+            foreach my $line (@lines) {
+                $body .= $line;
+            }
+
+            $body //= '';
+
+            my $content = $self->_renderer->renderer(
+                body   => $body,
+                format => $extension
+            );
+
+            push(
+                @comments,
+                {
+                    author      => $author,
+                    mail        => $mail,
+                    epoch       => $time,
+                    key         => $author . '_' . $time,
+                    url         => $url,
+                    hidden      => int($hidden) // 0,
+                    url_article => $file->parent->basename,
+                    body        => $content,
+                }
+            );
+        }
     }
-}
 
     return @comments;
 }
@@ -142,10 +146,15 @@ sub comment_list {
 }
 
 sub get_comments_by_article {
-    my ( $self, $id_article ) = validated_list(
-        \@_,
-        id_article => { isa => 'Str' }
+    state $check = compile(
+        $invocant,
+        slurpy Dict[
+            id_article => Str,
+        ]
     );
+    my ($self, $arg) = $check->(@_);
+    my $id_article = $arg->{id_article};
+
 
     my @comments;
 
@@ -157,11 +166,16 @@ sub get_comments_by_article {
 }
 
 sub add_comment {
-    my ( $self, $id_article, $params ) = validated_list(
-        \@_,
-        id_article => { isa => 'Str' },
-        params     => { isa => 'HashRef' }
+    state $check = compile(
+        $invocant,
+        slurpy Dict[
+            id_article => Str,
+            params     => HashRef
+        ]
     );
+    my ($self, $arg) = $check->(@_);
+    my $id_article    = $arg->{id_article};
+    my $params = $arg->{params};
 
     my $now = strftime "%Y-%m-%d-%H-%M-%S", localtime;
 
