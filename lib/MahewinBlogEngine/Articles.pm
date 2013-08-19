@@ -17,6 +17,18 @@ use Type::Params qw( compile );
 use Type::Utils;
 use Types::Standard qw( slurpy Dict Str );
 
+=attr date_order
+
+rw, Str. Specifies the sort order of items asc or desc.
+
+=cut
+
+has date_order => (
+    is      => 'rw',
+    isa     => Str,
+    default => sub { return 'desc' }
+);
+
 my $invocant = class_type { class => __PACKAGE__ };
 
 sub BUILD {
@@ -187,7 +199,10 @@ sub _sort {
     my ( $self, $articles ) = @_;
 
 
-    my @sort = sort { $b->{epoch} <=> $a->{epoch} } @{$articles};
+    my @sort = $self->date_order eq 'desc'
+        ? sort { $b->{epoch} <=> $a->{epoch} } @{$articles}
+        : sort { $a->{epoch} <=> $b->{epoch} } @{$articles};
+
     return \@sort;
 }
 
