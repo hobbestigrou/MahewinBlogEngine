@@ -4,7 +4,6 @@ use feature "state";
 
 use Moo;
 use Types::Path::Tiny qw/Path AbsPath/;
-use Path::Tiny qw( path );
 
 use CHI;
 
@@ -27,11 +26,7 @@ has 'directory' => (
     is       => 'rw',
     isa      => AbsPath,
     required => 1,
-    coerce   => sub {
-        my ( $dir ) = @_;
-
-        return path($dir);
-    }
+    coerce   => AbsPath->coercion,
 );
 
 =attr encoding
