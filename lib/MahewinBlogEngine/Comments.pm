@@ -1,8 +1,5 @@
 package MahewinBlogEngine::Comments;
 
-use strict;
-use warnings;
-
 use feature qw( state );
 
 use Moo;

@@ -14,8 +14,6 @@ use Type::Params qw( compile );
 use Type::Utils;
 use Types::Standard qw( slurpy Dict Str );
 
-use Data::Dumper;
-
 my $invocant = class_type { class => __PACKAGE__ };
 
 sub BUILD {
@@ -120,7 +118,6 @@ sub details {
     );
     my ($self, $arg) = $check->(@_);
     my $url = $arg->{link};
-    print 'Page demande détail', "\n";
 
     return $self->SUPER::details(
         link => $url,

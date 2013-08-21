@@ -12,8 +12,6 @@ use Type::Params qw( compile );
 use Type::Utils;
 use Types::Standard qw( slurpy Dict Object Str HashRef );
 
-use Data::Dumper;
-
 my $invocant = class_type { class => __PACKAGE__ };
 
 has _renderer_avalaible => (
