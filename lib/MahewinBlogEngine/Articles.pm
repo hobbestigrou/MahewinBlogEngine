@@ -12,10 +12,11 @@ use POSIX;
 
 use MahewinBlogEngine::Exceptions;
 use Time::Local qw(timelocal);
+use DateTime;
 
 use Type::Params qw( compile );
 use Type::Utils;
-use Types::Standard qw( slurpy Dict Str );
+use Types::Standard qw( slurpy Dict Optional Str Int );
 
 =attr date_order
 
@@ -175,6 +176,48 @@ sub article_by_tag {
             type => 'articles',
         )
     );
+}
+
+=method article_by_date
+
+  $articles->articles_by_date( month => 12 );
+
+Return a list of articles filter by date specified.
+
+  input: month (Int) : optional, month to match
+         year (Int) : optional, year to match
+  output: Hashref: Details of article
+
+=cut
+
+sub articles_by_date {
+   state $check = compile(
+        $invocant,
+        slurpy Dict[
+            month => Optional[Int],
+            year  => Optional[Int],
+        ]
+    );
+    my ($self, $arg) = $check->(@_);
+    my $month = $arg->{month};
+    my $year  = $arg->{year};
+
+    if ( ! defined($year) ) {
+        my $dt = DateTime->now;
+        $year  = $dt->year;
+    }
+
+    my $date  = defined($month)
+        ? qr/^\d\d\/$month\/$year\s\d\d:\d\d:\d\d$/
+        : qr/^\d\d\/\d\d\/$year\s\d\d:\d\d:\d\d$/;
+
+    my @articles;
+    foreach my $article ( @{$self->_get_or_create_cache('articles')} ) {
+        $article->{date} =~ $date
+            and push(@articles, $article);
+    }
+
+    return \@articles;
 }
 
 sub search {
