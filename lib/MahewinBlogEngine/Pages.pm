@@ -8,6 +8,7 @@ use feature qw( state );
 use Moo;
 extends 'MahewinBlogEngine::Common';
 
+use MahewinBlogEngine::Page;
 use MahewinBlogEngine::Exceptions;
 
 use Type::Params qw( compile );
@@ -67,15 +68,14 @@ sub _inject_article {
         );
         my @tags = split( ',', $tags );
 
-        push(
-            @pages,
-            {
-                title   => $title,
-                tags    => \@tags,
-                content => $content,
-                link    => $url
-            }
+        my $page =  MahewinBlogEngine::Page->new(
+            title   => $title,
+            tags    => \@tags,
+            content => $content,
+            link    => $url
         );
+
+        push(@pages, $page);
     }
 
     return @pages;

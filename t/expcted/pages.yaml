@@ -1,0 +1,31 @@
+--- 
+detail: !!perl/hash:MahewinBlogEngine::Page 
+  content: "<p>Just another page to test.</p>\n"
+  link: another_page
+  tags: 
+    - another
+    - " page\n"
+  title: "Another page\n"
+list: 
+  - !!perl/hash:MahewinBlogEngine::Page 
+    content: "<p>Just another page to test.</p>\n"
+    link: another_page
+    tags: 
+      - another
+      - " page\n"
+    title: "Another page\n"
+  - !!perl/hash:MahewinBlogEngine::Page 
+    content: "<p>Just about page to test.</p>\n"
+    link: about
+    tags: 
+      - about
+      - " me\n"
+    title: "About\n"
+tag: 
+  - !!perl/hash:MahewinBlogEngine::Page 
+    content: "<p>Just another page to test.</p>\n"
+    link: another_page
+    tags: 
+      - another
+      - " page\n"
+    title: "Another page\n"

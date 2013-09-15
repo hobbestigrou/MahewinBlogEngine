@@ -97,19 +97,16 @@ sub _inject_article {
             body   => $body,
             format => $extension
         );
-        my @tags = split( ',', $tags );
-
-        push(
-            @articles,
-            {
-                title   => $title,
-                tags    => \@tags,
-                date    => POSIX::strftime( $self->date_format, gmtime($time) ),
-                epoch   => $time,
-                content => $content,
-                link    => $url
-            }
+        my @tags    = split( ',', $tags );
+        my $article =  MahewinBlogEngine::Article->new(
+            title   => $title,
+            tags    => \@tags,
+            date    => $dt,
+            content => $content,
+            link    => $url
         );
+
+        push(@articles, $article);
     }
 
     return @articles;
@@ -129,7 +126,7 @@ Return list of all articles
 sub article_list {
     my ($self) = @_;
 
-    return $self->_sort( $self->_get_or_create_cache('articles') );
+    return $self->_sort($self->_get_or_create_cache('articles'));
 }
 
 =method article_details

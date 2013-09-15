@@ -1,0 +1,6 @@
+Title: Test textile format
+Tags: format, textile
+
+h1. Introduction
+
+Just a file to test the textile format.

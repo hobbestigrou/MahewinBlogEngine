@@ -1,0 +1,40 @@
+--- !!perl/hash:MahewinBlogEngine::Article 
+content: "<p>Just a simple hello world.</p>\n"
+date: !!perl/hash:DateTime 
+  formatter: ~
+  local_c: 
+    day: 27
+    day_of_quarter: 88
+    day_of_week: 4
+    day_of_year: 362
+    hour: 11
+    minute: 15
+    month: 12
+    quarter: 4
+    second: 0
+    year: 2012
+  local_rd_days: 734864
+  local_rd_secs: 40500
+  locale: !!perl/hash:DateTime::Locale::en_US 
+    default_date_format_length: medium
+    default_time_format_length: medium
+    en_complete_name: English United States
+    en_language: English
+    en_territory: United States
+    id: en_US
+    native_complete_name: English United States
+    native_language: English
+    native_territory: United States
+  offset_modifier: 0
+  rd_nanosecs: 0
+  tz: !!perl/hash:DateTime::TimeZone::Floating 
+    name: floating
+    offset: 0
+  utc_rd_days: 734864
+  utc_rd_secs: 40500
+  utc_year: 2013
+epoch: '1356606900'
+link: hello_world
+tags: 
+  - "Hello\n"
+title: "Hello world\n"

@@ -1,0 +1,81 @@
+--- 
+detail: !!perl/hash:MahewinBlogEngine::Article 
+  content: "<p>Just a simple hello world.</p>\n"
+  date: DateTime
+  link: hello_world
+  tags: 
+    - "Hello\n"
+  title: "Hello world\n"
+list: 
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<h1>Introduction</h1>\n\n<p>Just a file to test the textile format.</p>"
+    date: DateTime
+    link: test_textile_format
+    tags: 
+      - format
+      - " textile\n"
+    title: "Test textile format\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<h1>Introduction</h1>\n\n<p>Just a file to test pod format.</p>\n"
+    date: DateTime
+    link: test_pod_format
+    tags: 
+      - pod
+      - " format\n"
+    title: "Test pod format\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>To test footnote feature with multimarkdown.<a href=\"#fn:1\" id=\"fnref:1\" class=\"footnote\">1</a></p>\n\n<div class=\"footnotes\">\n<hr />\n<ol>\n\n<li id=\"fn:1\"><p>This is the footnote.<a href=\"#fnref:1\" class=\"reversefootnote\">&#160;&#8617;</a></p></li>\n\n</ol>\n</div>\n"
+    date: DateTime
+    link: test_footnotes
+    tags: 
+      - footnote
+      - " multimarkdown\n"
+    title: "Test footnotes\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>Just a another test article.</p>\n"
+    date: DateTime
+    link: another_test_article
+    tags: 
+      - test
+      - " article\n"
+    title: "Another test article\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>Just a simple hello world.</p>\n"
+    date: DateTime
+    link: hello_world
+    tags: 
+      - "Hello\n"
+    title: "Hello world\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>To test filter per date.</p>\n"
+    date: DateTime
+    link: test_filter_date
+    tags: 
+      - filter
+      - " date\n"
+    title: "Test filter date\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<h1>Introduction</h1>\n\n<p>Just a file to test the textile format.</p>"
+    date: DateTime
+    link: test_textile_format
+    tags: 
+      - format
+      - " textile\n"
+    title: "Test textile format\n"
+search: 
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>Just a simple hello world.</p>\n"
+    date: DateTime
+    link: hello_world
+    tags: 
+      - "Hello\n"
+    title: "Hello world\n"
+tag: 
+  - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>Just a another test article.</p>\n"
+    date: DateTime
+    link: another_test_article
+    tags: 
+      - test
+      - " article\n"
+    title: "Another test article\n"

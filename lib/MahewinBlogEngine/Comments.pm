@@ -128,20 +128,18 @@ sub _inject_comment {
                 body   => $body,
                 format => $extension
             );
+        my $comment =  MahewinBlogEngine::Comment->new(
+            author       => $author,
+            mail         => $mail,
+            date         => $dt,
+            link         => $url,
+            hidden       => int($hidden) // 0,
+            link_article => $file->parent->basename,
+            content      => $content,
+        );
 
-            push(
-                @comments,
-                {
-                    author      => $author,
-                    mail        => $mail,
-                    epoch       => $time,
-                    key         => $author . '_' . $time,
-                    url         => $url,
-                    hidden      => int($hidden) // 0,
-                    url_article => $file->parent->basename,
-                    body        => $content,
-                }
-            );
+        push(@comments, $comment);
+
         }
     }
 
@@ -168,7 +166,7 @@ sub get_comments_by_article {
     my @comments;
 
     foreach my $comment ( @{ $self->_get_or_create_cache } ) {
-        push( @comments, $comment ) if $comment->{url_article} eq $id_article;
+        push( @comments, $comment ) if $comment->{link_article} eq $id_article;
     }
 
     return \@comments;

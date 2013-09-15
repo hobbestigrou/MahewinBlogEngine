@@ -9,62 +9,21 @@ use Test::Differences::Color;
 use Cwd;
 use MahewinBlogEngine;
 
+use YAML::Syck;
+
 my $pages = MahewinBlogEngine->pages(
     directory => getcwd() . '/t/pages'
 );
-my $list = [{
-            'tags' => [
-                        'another',
-                        ' page
-'
-                      ],
-            'title' => 'Another page
-',
-            'content' => '<p>Just another page to test.</p>
-',
-            'link' => 'another_page'
-          },
-          {
-            'tags' => [
-                        'about',
-                        ' me
-'
-                      ],
-            'title' => 'About
-',
-            'link' => 'about',
-            'content' => '<p>Just about page to test.</p>
-'
-}];
-my $details = {
-    'tags' => [
-        'another',
-        ' page
-'
-        ],
-    'title' => 'Another page
-',
-    'content' => '<p>Just another page to test.</p>
-',
-    'link' => 'another_page'
-};
-my $tag = [{
-    'tags' => [
-        'another',
-        ' page
-'
-        ],
-    'title' => 'Another page
-',
-    'content' => '<p>Just another page to test.</p>
-',
-    'link' => 'another_page'
-}];
+my $expcted_file = LoadFile('/vagrant_data/MahewinBlogEngine/t/expcted/pages.yaml');
+
+my $list    = $expcted_file->{list};
+my $details = $expcted_file->{detail};
+my $tags    = $expcted_file->{tag};
 
 eq_or_diff $list, $pages->list, "Testing pages list";
 eq_or_diff $details, $pages->details(
     link => 'another_page' ), "Testing page details";
-eq_or_diff $tag, $pages->by_tag(
+eq_or_diff $tags, $pages->by_tag(
     tag => 'another'), "Testing pages tags";
 eq_or_diff $list, $pages->search(
     pattern => 'Just' ), "Testing pages search";
