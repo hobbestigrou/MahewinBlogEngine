@@ -7,12 +7,14 @@ extends 'MahewinBlogEngine::Common';
 
 use Carp;
 
-use Time::Local qw(timelocal);
-
+use MahewinBlogEngine::Comment;
 use MahewinBlogEngine::Exceptions;
 use MahewinBlogEngine::Renderer;
 
 use POSIX qw(strftime);
+
+use DateTime;
+use DateTime::TimeZone;
 
 use Type::Params qw( compile );
 use Type::Utils;
@@ -90,7 +92,18 @@ sub _inject_comment {
                 $self->_last_file->{$file} = $stat->[9];
             }
 
-            my $time      = timelocal( $6, $5, $4, $3, $2 - 1, $1 );
+            #Build date, url part and extension
+            my $dt = DateTime->new(
+                year      => $1,
+                month     => $2,
+                day       => $3,
+                hour      => $4 // 0,
+                minute    => $5 // 0,
+                second    => $6 // 0,
+                time_zone => DateTime::TimeZone->new(
+                    name => 'local' )->name(),
+            );
+
             my $extension = lc($7);
             my @lines     = $file->lines_utf8({chomp  => 0});
 

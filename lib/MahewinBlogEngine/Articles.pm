@@ -10,9 +10,11 @@ extends 'MahewinBlogEngine::Common';
 
 use POSIX;
 
+use MahewinBlogEngine::Article;
 use MahewinBlogEngine::Exceptions;
-use Time::Local qw(timelocal);
+
 use DateTime;
+use DateTime::TimeZone;
 
 use Type::Params qw( compile );
 use Type::Utils;
@@ -64,7 +66,15 @@ sub _inject_article {
         }
 
         #Build date, url part and extension
-        my $time      = timelocal( $6 // 0, $5 // 0, $4 // 0, $3, $2 - 1, $1 );
+        my $dt = DateTime->new(
+            year      => $1,
+            month     => $2,
+            day       => $3,
+            hour      => $4 // 0,
+            minute    => $5 // 0,
+            second    => $6 // 0,
+            time_zone => DateTime::TimeZone->new( name => 'local' )->name(),
+        );
         my $url       = lc($7);
         my $extension = lc($8);
 
@@ -243,8 +253,8 @@ sub _sort {
 
 
     my @sort = $self->date_order eq 'desc'
-        ? sort { $b->{epoch} <=> $a->{epoch} } @{$articles}
-        : sort { $a->{epoch} <=> $b->{epoch} } @{$articles};
+        ? sort { $b->date->epoch <=> $a->date->epoch } @{$articles}
+        : sort { $a->date->epoch <=> $b->date->epoch } @{$articles};
 
     return \@sort;
 }
