@@ -8,6 +8,14 @@ detail: !!perl/hash:MahewinBlogEngine::Article
   title: "Hello world\n"
 list: 
   - !!perl/hash:MahewinBlogEngine::Article 
+    content: "<p>To test a word begin by a dot.</p>\n"
+    date: DateTime
+    link: test_word_begin_dot
+    tags: 
+      - .vim
+      - " word\n"
+    title: "Test word begin dot\n"
+  - !!perl/hash:MahewinBlogEngine::Article 
     content: "<h1>Introduction</h1>\n\n<p>Just a file to test the textile format.</p>"
     date: DateTime
     link: test_textile_format
