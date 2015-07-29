@@ -14,7 +14,7 @@ use YAML::Syck;
 my $articles = MahewinBlogEngine->articles(
     directory => getcwd() . '/t/articles'
 );
-my $expcted_file = LoadFile('/vagrant_data/MahewinBlogEngine/t/expcted/articles.yaml');
+my $expcted_file = LoadFile(getcwd() . '/t/expcted/articles.yaml');
 
 my $list    = $expcted_file->{list};
 my $details = $expcted_file->{detail};
